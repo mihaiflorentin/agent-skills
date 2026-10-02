@@ -12,7 +12,7 @@ The **gate** is the project's full check (for example `make check`, or `npm test
 
 ## Pick a profile
 
-Time the project's full gate once, from a warm cache, and record the profile in `STATE.md`. Re-time it when the suite grows a lot.
+Time the project's full gate once, from a warm cache, and record the profile in `.agent-work/STATE.md`. Re-time it when the suite grows a lot.
 
 | Profile | Use when | Why |
 |---|---|---|
@@ -68,7 +68,7 @@ These apply in both profiles whenever a run takes more than about 2 minutes.
 
 ## Screenshot baselines
 
-1. The implementer regenerates baselines without committing them (Playwright: `--update-snapshots=changed`, or `=all` when a change falls under the tolerance). Copies go to `stop/{before,after}`, and the implementer STOPS.
+1. The implementer regenerates baselines without committing them (Playwright: `--update-snapshots=changed`, or `=all` when a change falls under the tolerance). Copies go to `.agent-work/shots/<plan>/{before,after}`, and the implementer STOPS.
 2. Build one contact sheet per review: `shared/scripts/contact-sheet.py sheet.png --cols 2 before1 after1 …`. Read the sheet, not each image.
 3. Check for overlapping or garbled text, cropping, missing objects and broken colours. A visual defect becomes a review finding, and its fix regenerates the baselines for another look.
 4. Commit the baselines yourself after the images pass.

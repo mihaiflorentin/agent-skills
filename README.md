@@ -46,11 +46,11 @@ Then merge, update the state files, `/compact`, and start the next plan at stage
 - **`/testing-changes`.** Nothing. It is the agents' and the controller's reference.
 - **`/reviewing-plans`.** Sometimes one question, when a finding turns out to be a product choice (for example "10% of max or of missing?").
 
-When you are away, the controller decides with a recommended default, logs it in `briefing.md` as its own ruling, and keeps going. You can overrule it later.
+When you are away, the controller decides with a recommended default, logs it in `docs/decisions.md` as its own ruling, and keeps going. You can overrule it later.
 
 ## A typical session
 
-1. Run `/orchestrating-development`. The controller reads `STATE.md`, says where things stand, and starts the next plan.
+1. Run `/orchestrating-development`. The controller reads `.agent-work/STATE.md`, says where things stand, and starts the next plan.
 2. Answer the plan's questions when they appear.
 3. Wait. The controller replies with one short line per agent notification. A plan takes a few hours of wall clock: the build in two halves, then the review and fixes.
 4. When a plan merges, the controller suggests `/compact`. Run it, because the controller's context is re-read on every notification.
@@ -58,12 +58,15 @@ When you are away, the controller decides with a recommended default, logs it in
 
 ## Files the workflow keeps
 
-These live in `.agent-work/` at the project root, a scratch folder that is never committed (add it to `.gitignore`). Details are in `shared/controller-files.md`.
+Committed in `docs/`, so every device and teammate has them:
+- **`docs/terminology.md`:** every business and technical term in plain words. Agents add a term in the commit that introduces it.
+- **`docs/decisions.md`:** every decision you made, verbatim and dated, plus the controller's rulings, marked as such.
+- **`docs/roadmap.md`:** the plans in order, with status and what you can try when each lands.
+- **`docs/specs/`, `docs/plans/`:** the specs and plans.
 
-- **`STATE.md`:** the resume point (what's done, what's running, what's next).
-- **`briefing.md`:** every decision you made, verbatim and dated, plus the controller's logged rulings.
-- **`workflow-metrics.md`:** tokens and tool calls per stage, the evidence for changing the workflow.
-- **`plans-run/<plan>/progress.md`:** each implementer's per-task ledger and its HAND-OFF section for the next agent.
+Local in `.agent-work/` (git-ignored), because they belong to one machine and one session: `STATE.md` (the resume point), `workflow-metrics.md`, the implementers' progress ledgers, question files, review packages and rulings, screenshots waiting for review, and logs.
+
+`shared/scripts/init-project.sh` creates this layout in a new project. `shared/project-files.md` has the details: the layout, what to commit, and who maintains each file.
 
 ## Architecture
 
@@ -113,7 +116,7 @@ Nothing runs below Sonnet 5.5. Opus is for graphical assets, audio, and work a S
 
 ## Test profiles
 
-`/testing-changes` has two cadences. Time the full gate once per project and record the profile in `STATE.md`:
+`/testing-changes` has two cadences. Time the full gate once per project and record the profile in `.agent-work/STATE.md`:
 - **Fast** (gate up to about 3 minutes, e2e up to about 5): test first, full gate before every commit. This is the usual recommended practice.
 - **Slow** (longer gates, shared databases or browsers): targeted checks per commit, one full gate per plan. This is the token-optimised cadence built on a game project, where a full gate plus e2e took 1–2 hours.
 
@@ -134,7 +137,7 @@ Nothing runs below Sonnet 5.5. Opus is for graphical assets, audio, and work a S
 
 These skills follow Anthropic's skill-authoring best practices (platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices):
 - Every description is in the third person and says what the skill does and when to use it. Claude picks a skill from its name and description alone; the body loads only after it is chosen.
-- Each SKILL.md stays far under 500 lines. Shared detail (`shared/agent-rules.md`, `shared/controller-files.md`) is linked directly from SKILL.md, one level deep.
+- Each SKILL.md stays far under 500 lines. Shared detail (`shared/agent-rules.md`, `shared/project-files.md`) is linked directly from SKILL.md, one level deep.
 - Each workflow opens with a copyable progress checklist and a contents line. Any file over 100 lines starts with a contents list, because Claude sometimes previews a file with a partial read (`head -100`).
 - References to other skills are steps inside a stage, never standing rules. Each names the context it loads in (usually a subagent's) and what happens when that skill isn't installed. A skill's body loads only when a step uses it, so a reference costs nothing until then. Each reference also says to load the skill once per context: after the first load its rules are already in context and can be applied without loading it again.
 - No path on the author's machine. Inside a skill, paths are relative to the skill's folder; each skill that uses `shared/` has a `shared` link to it, and other skills are found in `~/.claude/skills/<name>/`. The controller writes full paths into subagent prompts.

@@ -27,7 +27,7 @@ Every tool call re-reads the agent's whole context, so the cost is about calls Ã
 
 ## Gate cadence
 
-Paste the block for the project's profile (from `/testing-changes`, recorded in `STATE.md`).
+Paste the block for the project's profile (from `/testing-changes`, recorded in `.agent-work/STATE.md`).
 
 **Fast profile** (full gate up to about 3 minutes):
 - Write the failing test first and watch it fail, then make it pass.
@@ -57,6 +57,7 @@ Paste the block for the project's profile (from `/testing-changes`, recorded in 
 ## Scope
 
 - Build only what the plan and the user's decisions name. If a gameplay or product question is genuinely open, take the option closest to the plan, log it as a deviation and continue.
+- Use the names in `docs/terminology.md`. A new business or technical term goes into it in the same commit that introduces it. `docs/` is committed; `.agent-work/` never is.
 - Subagents never dispatch subagents and never retry a refused permission.
 - **Hand-off.** At about 500k tokens, or after 6 tasks, stop after a committed task. Write a HAND-OFF section in the progress file covering the seams, the gotchas and the work still owed. A fresh agent continues from there, because a subagent's context cannot be compacted.
 

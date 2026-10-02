@@ -25,16 +25,17 @@ One implementer builds a run of tasks, then hands off to a fresh one. A subagent
 
 1. **Dispatch the first half** (Tasks 1–6, or about 500k tokens' worth). The prompt carries:
    - one line on where the plan fits;
-   - the plan path and the briefing section with the binding decisions (and the cut features to leave out);
+   - the plan path and the decisions section with the binding decisions (and the cut features to leave out);
    - which AGENTS.md sections to read, and the project's architecture rules. For a hexagonal project (the `applying-hexagonal-architecture` skill), each task goes `port/` → `domain/` → `infrastructure/` → `config/` → `container/` → `cmd/`;
-   - the progress file path, `plans-run/<plan>/progress.md`;
+   - `docs/terminology.md`: use its names, and add a term in the same commit that introduces it in code or UI;
+   - the progress file path, `.agent-work/plans-run/<plan>/progress.md`;
    - the blocks from `shared/agent-rules.md`: token and tool-call discipline, waiting, gate cadence for the project's test profile (Slow: targeted checks only, **no full gate in this half**; Fast: test first, full gate before every commit), commits (every commit builds), scope, hand-off and the return contract.
-2. **Read the first half's report** (5–10 lines). Record its tokens and tool calls in `workflow-metrics.md`. Check its deviations against the briefing. Turn any concern into an instruction for the second half.
+2. **Read the first half's report** (5–10 lines). Record its tokens and tool calls in `.agent-work/workflow-metrics.md`. Check its deviations against the decisions file. Turn any concern into an instruction for the second half.
 3. **Dispatch the second half** to a fresh agent. Its prompt has the HAND-OFF section first, then the remaining tasks and the same blocks. Add:
    - any concern from step 2 as an explicit fix;
    - the full gate after the last task (see `/testing-changes`), fixed and rerun until green;
    - stop and write a HAND-OFF section at about 500k tokens, before finishing.
-4. **UI plans:** the final gate includes the full e2e suite. New or changed screenshot baselines stay uncommitted. Copies go to `stop/{before,after}`, and the agent STOPS for the controller's image review (`/testing-changes`).
+4. **UI plans:** the final gate includes the full e2e suite. New or changed screenshot baselines stay uncommitted. Copies go to `.agent-work/shots/<plan>/{before,after}`, and the agent STOPS for the controller's image review (`/testing-changes`).
 5. **Done when** every task is committed, the progress file has one line per task, and the gate log ends in `EXIT 0`. Then run `/reviewing-plans`.
 
 ## Watch for
