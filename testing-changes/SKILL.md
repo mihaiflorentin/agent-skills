@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Test workflow
 
-Contents: Pick a profile · Cadence: Fast profile · Cadence: Slow profile · Long runs · Flaky tests · Screenshot baselines
+Contents: Pick a profile · Cadence: Fast profile · Cadence: Slow profile · The tester (parallel lanes) · Long runs · Flaky tests · Screenshot baselines
 
 The **gate** is the project's full check (for example `make check`, or `npm test && npm run lint`). The **pre-merge gate** adds whatever runs before a merge (image builds, container checks). How often to run them depends on how long they take, so pick a profile first.
 
@@ -46,13 +46,21 @@ This is token-optimised for long gates, as used on a game project, where `make c
 | After review fixes | The full gate once. |
 | Before a merge | The pre-merge gate (gate plus image or container checks). Regenerate generated files rather than hand-resolving their conflicts. |
 
+## The tester (parallel lanes)
+
+When a plan was built as parallel lanes, lanes run only unit tests under a minute each, so the slow gates move to one place: ONE tester agent, after the merge, review and fix.
+- It reads the combined owed-to-tester list and runs the full gate and the full browser suite (the Slow profile's end-of-plan run), in the background with `run-logged.sh`.
+- Specs that advance shared clocks or other global state run last, or on a fresh server.
+- On a failure it reruns that test alone before treating it as real. Under heavy parallel load, load-sensitive tests flake; a pass alone is a flake, to be fixed at the root.
+- A real failure goes to the fixer (`/reviewing-plans`) with the log path. The tester and the fixer loop until the gate is green.
+
 ## Long runs
 
 These apply in both profiles whenever a run takes more than about 2 minutes.
 
 
 - Start them with `shared/scripts/run-logged.sh LOG -- <cmd>` under `run_in_background`, and wait for the notice. The log ends in `EXIT n`, and the script prints only the failure lines. Otherwise, make one blocking call with timeout 600000.
-- Never wait with `tail -f | grep`, sleep or `pgrep` loops. A `tail -f` hung for 56 minutes after its run had finished. If something seems stuck, run `shared/scripts/stale-waits.sh`.
+- Never wait with `tail -f | grep`, sleep or `pgrep` loops. A `tail -f` hung for 56 minutes after its run had finished, and another such wait hung for 5 hours. If something seems stuck, run `shared/scripts/stale-waits.sh`.
 - A duplicate waiter on a run that is still going is harmless. Report it rather than killing it, and kill a process only when it is stuck (its log already ends in `EXIT n`) or orphaned.
 - A stray `&` inside a foreground command leaves an orphaned run with no completion notice. Kill it and restart it properly.
 - On a 16-thread machine, heavy integration suites flake under `-j16`. If the gate fails only on load-sensitive tests, rerun with `-j4` before investigating.

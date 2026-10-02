@@ -1,6 +1,6 @@
 ---
 name: planning-slices
-description: Turns one roadmap slice into a light implementation plan (150-300 lines, no code): question scout, user decisions quoted verbatim, contracts and tests per task, and a design review only for risky plans. Use when the next roadmap item needs a plan, or a plan must be split or revised.
+description: Turns one roadmap slice into a light implementation plan (150-300 lines, no code): question scout, user decisions quoted verbatim, contracts and tests per task, a wave table with lanes and a file ownership table for parallel builds, and a design review for risky plans. Use when the next roadmap item needs a plan, or a plan must be split or revised.
 disable-model-invocation: true
 ---
 
@@ -12,9 +12,9 @@ Copy this checklist and tick it off as you go:
 Plan progress:
 - [ ] 1. Question scout file written
 - [ ] 2. User answered; answers in docs/decisions.md verbatim
-- [ ] 3. Light plan written
+- [ ] 3. Light plan written, with wave table, lanes and file ownership table
 - [ ] 4. Plan defaults checked against the user's decisions
-- [ ] 5. Design review (risky plans only)
+- [ ] 5. Design review (risky plans and server lanes touching multi-writer state)
 - [ ] 6. Revision by a fresh agent (if reviewed)
 - [ ] 7. Plan committed; cost logged
 ```
@@ -50,6 +50,9 @@ A plan should cost a small fraction of what its build costs. Measured on this wo
    - User decisions, quoted verbatim.
    - Contracts per task, named in the project's own layering: the new interfaces, data types, packages or modules, adapters, wiring, routes or commands and config. For a hexagonal project, list them by folder as the `applying-hexagonal-architecture` skill describes. Also units and lock order, new tables, events and jobs, wire and read changes, statement or performance budgets for new units.
    - Tasks: 8–12, each naming its required tests, including multi-replica races for anything several actors write.
+   - **Wave table:** the tasks grouped into waves. Tasks in one wave are independent of each other. When lanes share types, wave 0 is a tiny "seams and types only" task that defines them.
+   - **Lanes:** at most 4 implementer lanes per wave, 2–3 tasks each. A plan whose tasks all depend on each other has one task per wave; `/implementing-plans` then builds it in sequential halves.
+   - **File ownership table:** one owner lane for every shared file or resource: size budgets, docs, shared contracts and wire types, generated goldens, statement and performance pins, i18n and name tables, feature flags. Non-owners write "Notes for the merge" in their ledger instead of editing. A shared file with no owner is a plan defect.
    - Gates.
    - Hand-off notes.
    - New terms: the plan writer adds each new name (component, status, wire field, player-visible word) to `docs/terminology.md`.
@@ -57,10 +60,10 @@ A plan should cost a small fraction of what its build costs. Measured on this wo
 
    No code, no SQL, 150–300 lines. If the `unslop` skill is installed, the plan writer passes its draft through it once before finishing (one load, not one per section); say so in the writer's prompt, so the skill loads in its context and not yours. The plan writer reads seams through LSP, grep and `go doc`, never whole files. If another agent is committing in the same checkout, it writes the file without committing, and you commit it with `shared/scripts/commit-only.sh`.
 4. **Check against the decisions.** Read the plan's "decisions to confirm". Reject any default that contradicts a binding user decision. One plan once changed "opens automatically" into "a player opens it".
-5. **Design review**, only for risky plans: concurrency, money or loot, many-player writes, protocols. Dispatch one `reviewer`. It returns at most 40 lines covering findings by severity (with plan line, problem and fix) and a verdict on each decision. Skip this for plans where each player's data is private.
+5. **Design review**, for risky plans: concurrency, money or loot, many-player writes, protocols. Server lanes that touch multi-writer state always get one before the build: on a trial it found 4 serious bugs before any code existed. Dispatch one `reviewer`. It returns at most 40 lines covering findings by severity (with plan line, problem and fix) and a verdict on each decision. Skip this for plans where each player's data is private.
 6. **Revise.** Write the rulings file: the findings plus your decisions. Hand it to a **fresh** `implementer`, which folds each fix into the contract or task it belongs to.
 7. **Commit** the plan to `docs/plans/YYYY-MM-DD-<slice>.md` with its terminology lines and the `docs/decisions.md` section, mark it "in progress" in `docs/roadmap.md`, and log its cost in `.agent-work/workflow-metrics.md`.
 
 ## Done when
 
-The plan is committed, every user decision is quoted in it verbatim, no cut feature appears in it, and every multi-writer contract has a named test.
+The plan is committed, every user decision is quoted in it verbatim, no cut feature appears in it, every multi-writer contract has a named test, and every shared file has one owner lane.

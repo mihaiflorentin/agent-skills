@@ -1,6 +1,6 @@
 ---
 name: implementing-plans
-description: Builds a committed plan with implementer subagents in two halves of about 6 tasks each, with a HAND-OFF section in the progress file between them and one full gate at the end. Use right after a plan is committed, or to resume a half-built plan.
+description: Builds a committed plan with implementer subagents, by default as parallel lanes (one git worktree and branch per lane, a wave table, file ownership, a merge agent), or in two sequential halves when every task depends on the previous one. Use right after a plan is committed, or to resume a half-built plan.
 disable-model-invocation: true
 ---
 
@@ -9,7 +9,20 @@ disable-model-invocation: true
 Copy this checklist and tick it off as you go:
 
 ```
-Build progress:
+Build progress (parallel lanes, the default):
+- [ ] 1. Plan has a wave table, lanes and a file ownership table; mode chosen
+- [ ] 2. Lane-rules file written in .agent-work/; one worktree and branch per lane
+- [ ] 3. Wave 0 (seams and types) merged, if the plan has one
+- [ ] 4. Each wave: lanes dispatched together, reports read, metrics logged
+- [ ] 5. Merge agent: lanes merged (--no-ff), notes applied, fast checks green, owed-to-tester list written
+- [ ] 6. Art lanes: renders approved by the user before commit
+- [ ] 7. Hand over to /reviewing-plans (one reviewer, one fixer, one tester)
+```
+
+Sequential fallback checklist:
+
+```
+Build progress (sequential halves):
 - [ ] 1. First half dispatched (tasks 1-6)
 - [ ] 2. First half's report read; metrics logged; concerns turned into instructions
 - [ ] 3. Second half dispatched with the HAND-OFF section
@@ -17,11 +30,33 @@ Build progress:
 - [ ] 5. Every task committed; gate log ends in EXIT 0
 ```
 
-Contents: Steps · Watch for
+Contents: Choose the mode · Parallel lanes · Sequential halves · Watch for
 
-One implementer builds a run of tasks, then hands off to a fresh one. A subagent's context cannot be compacted, and every tool call re-reads all of it. One agent that carried 12 tasks reached about 950k tokens and took 5.5 h. Split into halves, the same size of plan costs 600k + 400k.
+A subagent's context cannot be compacted, and every tool call re-reads all of it, so cost grows with the length of one agent's run. Lanes keep every agent short and run side by side. Measured on one 20-task plan: sequential halves cost 158–189k Sonnet tokens and 29–40 minutes per task; four parallel lanes cost about 98k tokens and 3.5 minutes per task, 20 tasks in about 70 minutes. Review, fix and test costs come on top (see `/reviewing-plans` and `/testing-changes`).
 
-## Steps
+## Choose the mode
+
+Use **parallel lanes** when the plan has a wave table and a file ownership table (`/planning-slices`). Use **sequential halves** only when the tasks all depend on each other, so no wave holds more than one task. If the plan has no wave table, send it back to `/planning-slices` first.
+
+## Parallel lanes
+
+1. **Lane rules.** Copy `shared/lane-rules.md` to `.agent-work/plans-run/<plan>/lane-rules.md` and fill in the project's test commands, the ownership table location and the docs to read. Every dispatch prompt then stays a few lines: the lane name, its tasks, the plan path and the rules path.
+2. **Worktrees.** For each lane, one worktree and one branch off the current base: `git worktree add -b <plan>/lane-x ../<plan>-lane-x`. Share installed dependencies instead of reinstalling (for example a symlink to `node_modules`). Lane agents never touch another lane's worktree.
+3. **Wave 0.** If lanes share types, a tiny wave-0 task (seams and types only, no behaviour) builds first, is merged into the base, and the lane branches start from it.
+4. **Dispatch each wave.** At most 4 `implementer` agents per wave, 2–3 tasks each, all dispatched in one message. A lane may edit only files it owns (the plan's ownership table). For a file it does not own it writes a line under "Notes for the merge" in its ledger and does not edit. Each prompt carries:
+   - the lane name, worktree path, task numbers and plan path;
+   - the lane-rules path and the binding decisions section;
+   - `docs/terminology.md`, and for a hexagonal project the build order of `/applying-hexagonal-architecture`.
+5. **Lane tests.** Lanes run only unit tests that finish in under a minute each. No full gate, no browser suite, no database suite: the tester runs those later. Whatever a lane skips for that reason goes in its ledger under "Owed to the tester". Tests a lane cannot finish within its budget go in the ledger under owed work, and the fixer writes them (`/reviewing-plans`).
+6. **Ledger.** Each lane keeps `.agent-work/plans-run/<plan>/lane-x.md` with one line per task and commit, the sections "Notes for the merge" and "Owed to the tester", and a HAND-OFF section if it stops early. A lane stops at its budget and leaves the rest as owed work; it does not squeeze work in.
+7. **Merge agent.** After each wave (or at the end when waves are small), dispatch one `implementer` that merges every lane branch with `--no-ff`, applies each lane's "Notes for the merge" to the files it owns, resolves conflicts (regenerate generated files rather than hand-merging them), runs the fast checks and writes one combined owed-to-tester list. Later waves branch from the merged base.
+8. **Art and asset lanes.** Graphical or audio lanes run on Opus (`/orchestrating-development` model rules), in parallel with the code lanes. Renders are not committed until the user has approved them at an art checkpoint (`/testing-changes`, screenshot baselines). Report their tokens separately from the code lanes.
+9. **Metrics.** Record each agent's tokens, tool calls and wall clock in `.agent-work/workflow-metrics.md`.
+10. **Done when** every lane is merged, the fast checks are green on the merged base, and the combined owed-to-tester list exists. Then run `/reviewing-plans`. The full gate belongs to the tester, not to this stage.
+
+## Sequential halves
+
+For plans whose tasks all depend on each other. One implementer builds a run of tasks, then hands off to a fresh one. One agent that carried 12 tasks reached about 950k tokens and took 5.5 h. Split into halves, the same size of plan costs 600k + 400k.
 
 1. **Dispatch the first half** (Tasks 1–6, or about 500k tokens' worth). The prompt carries:
    - one line on where the plan fits;
@@ -40,7 +75,10 @@ One implementer builds a run of tasks, then hands off to a fresh one. A subagent
 
 ## Watch for
 
-- **Skipped tests.** Implementers skip owed race tests under budget pressure. Pass the "owed" list to the reviewer, who decides from the code which ones hide real bugs.
+- **Skipped tests.** Implementers skip owed tests under budget pressure. Pass every ledger's "Owed to the tester" and owed-work lists on: the reviewer decides from the code which ones hide real bugs, and the fixer writes them.
+- **Seam mismatches.** Parallel lanes cannot see each other. Wire and field names, shared stores, call chains and feature flags are where they disagree. The ownership table and wave 0 reduce this; the review's first focus catches the rest.
+- **Ownership breaches.** A lane that edits a shared file it does not own causes merge conflicts and silent overwrites. The merge agent reports any it finds.
 - **Broken commits.** A commit that doesn't build, or that truncates a function, slipped through twice at medium effort. The "chain the build before committing" rule prevents it.
-- **Re-pinned budgets.** Statement or performance re-pins need a stated reason in the commit message. Read them.
-- **Noise in your context.** Live diagnostics (gopls, tsserver) about files the agents are editing land in your context as errors. They are stale snapshots of half-edited files. Ignore them, or run the plan in its own worktree.
+- **Re-pinned budgets.** Statement or performance re-pins need a stated reason in the commit message, and only the owning lane makes them. Read them.
+- **Waits.** Never use sleep, `tail -f` or `pgrep` loops to wait. One such wait hung for 5 hours.
+- **Noise in your context.** Live diagnostics (gopls, tsserver) about files the agents are editing land in your context as errors. They are stale snapshots of half-edited files. Ignore them; worktrees reduce this.

@@ -23,7 +23,11 @@ Every tool call re-reads the agent's whole context, so the cost is about calls Ã
 
 - Start long jobs (full gates, e2e, simulations) with `run_in_background` and wait for the completion notice. Otherwise make one blocking call with timeout 600000.
 - Wrap the command in `shared/scripts/run-logged.sh` so the log ends in an `EXIT <code>` line.
-- **Never** wait with `tail -f LOG | grep -m1 X`. tail exits only on its next write, so once the log stops growing the wait hangs forever. Never use sleep or `pgrep` loops either.
+- **Never** wait with `tail -f LOG | grep -m1 X` (one such wait hung for 5 hours). tail exits only on its next write, so once the log stops growing the wait hangs forever. Never use sleep or `pgrep` loops either.
+
+## Parallel lanes
+
+When a plan builds as lanes, paste `shared/lane-rules.md` (filled in) instead of the gate cadence and hand-off blocks below. Lanes stop at their budget and list unreached work as owed work for the fixer.
 
 ## Gate cadence
 

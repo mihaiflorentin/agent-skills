@@ -12,18 +12,19 @@ Claude Code skills for building software with subagents. You make the product de
 - Install
 - Test profiles
 - Rules of thumb that came from real failures
+- Measured
 - Authoring notes
 
 ## The skills, in order
 
 | # | Skill | When you use it | What you get |
 |---|---|---|---|
-| 0 | `/orchestrating-development` | At the start of every session and after a `/compact` | The controller loop: resume from the state files, pick the next plan, run stages 2–5 |
+| 0 | `/orchestrating-development` | At the start of every session and after a `/compact` | The controller loop: resume from the state files, pick the next plan, run stages 2–5, record tokens and quota |
 | 1 | `/writing-specs` | Once per new area of the product, before any plan touches it | An approved spec in which every feature is marked `[USER]`, `[PROPOSED]` or `[DEFAULT]` |
-| 2 | `/planning-slices` | Once per roadmap slice (a "plan") | A committed light plan, 150–300 lines, quoting your decisions verbatim |
-| 3 | `/implementing-plans` | Right after the plan is committed | Every task built and committed in two halves, full gate green |
-| 4 | `/testing-changes` | Reference, used during stage 3 and before merges | The test cadence, how to wait on long runs, flaky-test triage, screenshot review |
-| 5 | `/reviewing-plans` | Right after the build's gate is green | Review findings fixed, gate green again, open items logged |
+| 2 | `/planning-slices` | Once per roadmap slice (a "plan") | A committed light plan, 150–300 lines, quoting your decisions verbatim, with a wave table, lanes and a file ownership table |
+| 3 | `/implementing-plans` | Right after the plan is committed | Parallel lanes (one worktree each) merged with fast checks green; two sequential halves when tasks all depend on each other |
+| 4 | `/testing-changes` | Reference, used during stage 3 and before merges | The test cadence, the single tester that runs the slow gates, how to wait on long runs, flaky-test triage, screenshot review |
+| 5 | `/reviewing-plans` | Right after the build's gate is green | One reviewer's findings (cross-lane seams first) fixed by one fixer, open items logged |
 | – | `/unslop` | Whenever prose is written for people | Specs, plans, docs and messages without AI writing patterns |
 | – | `/applying-hexagonal-architecture` | Only in projects on the hexagonal layout | The layout, service-container rules and layer check the other skills apply there |
 
@@ -34,7 +35,7 @@ Then merge, update the state files, `/compact`, and start the next plan at stage
       │
       ▼
 ┌─► /planning-slices ──► /implementing-plans ──► /reviewing-plans ──► merge + /compact ─┐
-│                         (uses /testing-changes)                                       │
+│            (lanes in waves; then one reviewer, one fixer, one tester)                 │
 └─────────────────────────────────── next plan ───────────────────────────────────────┘
 ```
 
@@ -42,7 +43,7 @@ Then merge, update the state files, `/compact`, and start the next plan at stage
 
 - **`/writing-specs`.** You answer product questions in batches of up to 4. You then go through every agent-proposed feature and choose keep or cut. Last, you approve the written spec.
 - **`/planning-slices`.** You answer up to about 8 questions per plan, mostly keep/cut on proposed features plus the gameplay choices the spec leaves open. Engineering questions are decided for you and logged.
-- **`/implementing-plans`.** Nothing, unless an agent reports a concern that needs a product decision. For UI work, the controller checks the screenshots before they are committed.
+- **`/implementing-plans`.** Nothing, unless an agent reports a concern that needs a product decision. For UI and art work, you approve the renders and screenshots before they are committed. The controller also asks for your weekly quota percentage at the build's start, after it and when the gate is green.
 - **`/testing-changes`.** Nothing. It is the agents' and the controller's reference.
 - **`/reviewing-plans`.** Sometimes one question, when a finding turns out to be a product choice (for example "10% of max or of missing?").
 
@@ -52,7 +53,7 @@ When you are away, the controller decides with a recommended default, logs it in
 
 1. Run `/orchestrating-development`. The controller reads `.agent-work/STATE.md`, says where things stand, and starts the next plan.
 2. Answer the plan's questions when they appear.
-3. Wait. The controller replies with one short line per agent notification. A plan takes a few hours of wall clock: the build in two halves, then the review and fixes.
+3. Wait. The controller replies with one short line per agent notification. A plan takes a few hours of wall clock: the build as parallel lanes in waves (about 70 minutes for 20 tasks), then one review, one fix pass and one test loop.
 4. When a plan merges, the controller suggests `/compact`. Run it, because the controller's context is re-read on every notification.
 5. Repeat.
 
@@ -83,6 +84,7 @@ Other projects never load it.
 ## Shared material
 
 - **`shared/agent-rules.md`:** the rule blocks the controller pastes into every subagent prompt. It covers which model to use, token and tool-call discipline, waiting on long runs, test cadence, commits, scope, hand-off and the short return format. Edit this file to change how every agent behaves.
+- **`shared/lane-rules.md`:** the template of a lane-rules file: read-first list, ownership rule, under-a-minute tests, token discipline, commit rules, ledger format, hand-off at about 450k tokens and the return contract. `/implementing-plans` copies it once per plan so each lane's prompt is a few lines.
 - **`shared/scripts/`:**
 
 | Script | Does |
@@ -126,12 +128,29 @@ Nothing runs below Sonnet 5.5. Opus is for graphical assets, audio, and work a S
 |---|---|
 | Ask questions before writing a plan. | Answers that arrived after the plan was written forced two full rewrites, about 3M tokens. |
 | Tag spec features by provenance. | Daily quests reached a plan that the user had never discussed. |
-| Hand off at about 500k tokens or 6 tasks. | One agent carrying 12 tasks grew to 950k tokens and 5.5 h. |
-| Never wait with `tail -f \| grep`. | A wait hung for 56 minutes after its test run had finished. |
-| Never run a server plan and a UI plan at the same time. | The machine load made perf tests flake, and the reruns cost more than the parallelism saved. |
+| Hand off at about 500k tokens or 6 tasks (450k for a lane). | One agent carrying 12 tasks grew to 950k tokens and 5.5 h. |
+| Never wait with `tail -f \| grep`, sleep or `pgrep`. | One wait hung for 56 minutes after its test run had finished, another for 5 h. |
+| Never run a server plan and a UI plan at the same time. | The machine load made perf tests flake, and the reruns cost more than the parallelism saved. Lanes of one plan avoid it by running only unit tests under a minute. |
+| Name one owner lane for every shared file. | Parallel lanes cannot see each other; shared budgets, docs, wire types and goldens are where they collide. |
+| Review all lanes with one reviewer, seams first. | The Important findings of the lane trial were disagreements on wire names, shared stores, call chains and flags. |
+| Design-review server lanes that write shared state before the build. | The review found 4 serious bugs before any code existed. |
+| A lane stops at its budget and leaves owed work for the fixer. | Lanes that squeezed in the last tasks shipped broken ones; the fixer writes the skipped tests. |
+| The reviewer checks new tests against the server contract. | A wrong unit test pinned a wrong command. |
+| One tester runs the slow gates and loops with the fixer. Rerun a failure alone before treating it as real. | Under heavy parallel load, load-sensitive specs failed that passed alone. |
 | Check the plan's open decisions against the user's answers. | A plan turned "opens automatically" into "a player opens it". |
 | Make every commit build. | Two commits at medium effort didn't build, or cut a function short. |
 | Keep the review, scoped. | It found 1–5 real Important bugs per plan whatever the plan style was. |
+
+## Measured
+
+On one 20-task plan, after a trial the user judged "a huge improvement":
+
+| Build mode | Sonnet tokens per task | Wall clock per task |
+|---|---|---|
+| Sequential halves | 158–189k | 29–40 min |
+| Parallel lanes (4 lanes, waves) | about 98k | about 3.5 min |
+
+The 20 tasks took about 70 minutes and about 2% of a weekly quota. Review, fix and test costs are added afterwards. Art lanes run on Opus and are reported separately. The controller records these numbers per plan in `.agent-work/workflow-metrics.md`.
 
 ## Authoring notes
 
