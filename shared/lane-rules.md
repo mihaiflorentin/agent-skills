@@ -60,3 +60,12 @@ At about 450k tokens, or at your budget, stop after a committed task and write a
 ## Return contract
 
 Return at most 5–10 lines: one line per task with its commit, the ledger path, and any concern. The full report is the ledger. Every line you return stays in the controller's context for the rest of the session.
+
+## Never trigger a permission prompt
+
+Nobody may be awake to answer it, and a waiting agent blocks its lane for hours.
+- Use absolute paths and `git -C`, `go -C`, `npm --prefix`, `make -C` instead of `cd <dir> && …` compounds.
+- Write commit messages to a file and commit with `-F <file>`; avoid multi-line `-m`.
+- Create files with the editor tools, not shell heredocs.
+- Stay inside your worktree and the scratch folder; never write to `.git/`, `.claude/` or home dotfiles.
+- A refused or blocked command is logged and skipped, never retried or waited on.

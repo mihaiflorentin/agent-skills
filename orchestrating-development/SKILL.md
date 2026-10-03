@@ -51,6 +51,7 @@ Record tokens, tool calls and wall clock for every agent in `.agent-work/workflo
 - **Fresh agents for revisions.** Give a fix or a plan revision to a new agent along with a findings file. Resuming a long-running agent drags its whole context along.
 - **Short replies to the user.** One short status line per notification. Batch updates.
 - **Architecture.** Follow the project's own conventions. For a project on the hexagonal layout (`cmd/`, `config/`, `container/`, `domain/`, `infrastructure/`, `port/`), every stage also applies `/applying-hexagonal-architecture`.
+- **Watchdog for unattended runs.** A stuck agent sends no notification. While agents run unattended, keep one background timer running (`sleep 2700` with run_in_background); when it fires, check each running agent's log or worktree for progress, then start the next timer. An agent with no file or log change for over 45 minutes is probably waiting on a prompt: report it, and restart its lane if needed.
 - **Agent rules travel in the prompt.** Paste the blocks from `shared/agent-rules.md` into every dispatch.
 
 ## Paths
