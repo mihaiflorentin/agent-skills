@@ -1,5 +1,5 @@
 ---
-name: writing-specs
+name: write-specs
 description: Writes or extends a design spec with the user: research brief, product questions first, provenance tags ([USER], [PROPOSED], [DEFAULT]) and a keep/cut pass on agent-proposed features. Use when a new product area needs a spec, or an existing spec needs new features, before any plan touches it.
 disable-model-invocation: true
 ---
@@ -28,7 +28,7 @@ A spec says what the software must do and why. Plans argue from it, so an unexam
 ## Steps
 
 1. **Research brief.** Dispatch a `scout`. It collects the source material (references, the existing code's behaviour, earlier specs), writes it to a scratch file, and returns its path plus a 10-line summary. Done when the brief names every area the spec must cover.
-2. **Questions first.** Before anything is written, list the product questions. Each one gets 2–4 options, a recommendation with a one-line reason, and what it decides. Ask the user one decision at a time (AskUserQuestion), each with a Background paragraph that explains the terms in plain words, as `/orchestrating-development` sets out. Done when every question that would change the design has an answer, or a logged default if the user is away.
+2. **Questions first.** Before anything is written, list the product questions. Each one gets 2–4 options, a recommendation with a one-line reason, and what it decides. Ask the user one decision at a time (AskUserQuestion), each with a Background paragraph that explains the terms in plain words, as `/orchestrate-development` sets out. Done when every question that would change the design has an answer, or a logged default if the user is away.
 3. **Draft.** Dispatch one writer (`implementer`, or `implementer-high` for a really difficult design). Give it the brief, the answers verbatim and the template below. It writes the spec file and does not commit.
 4. **Terms.** The writer adds every new business or technical term the spec introduces to `docs/terminology.md`, one plain line each, and uses those names throughout the spec.
 5. **Mark provenance.** Tag every feature and rule with exactly one of:
@@ -47,7 +47,7 @@ A spec says what the software must do and why. Plans argue from it, so an unexam
 - Goals and non-goals.
 - Users and flows.
 - Rules, each tagged with its provenance.
-- Data and contracts: the interfaces (contracts) each feature needs, named for the need. Tables and endpoints are implementation details, not rules. Follow the project's architecture guide in its AGENTS.md or CLAUDE.md; on the hexagonal layout, the `applying-hexagonal-architecture` skill.
+- Data and contracts: the interfaces (contracts) each feature needs, named for the need. Tables and endpoints are implementation details, not rules. Follow the project's architecture guide in its AGENTS.md or CLAUDE.md; on the hexagonal layout, the `apply-hexagonal-architecture` skill.
 - Failure modes.
 - Open questions, each with a default.
 - Deferrals.

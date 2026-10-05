@@ -1,5 +1,5 @@
 ---
-name: applying-hexagonal-architecture
+name: apply-hexagonal-architecture
 description: Describes the hexagonal (ports and adapters) layout with main.go, cmd, config, container, domain, infrastructure and port/{contract,dto,mock}, the lazy service container's rules and the layer import check. Use when designing, planning, building or reviewing code in a project that follows this layout.
 disable-model-invocation: true
 ---
@@ -111,16 +111,16 @@ Container rules:
 
 ## How the workflow uses it
 
-- **`/writing-specs`.** The spec's "Data and contracts" section names the contracts a feature needs. Tables, endpoints and config keys are adapter or config details, not rules.
-- **`/planning-slices`.** For each task, the plan's contracts list the new `port/contract` interfaces and DTOs, `domain/` packages and services, `infrastructure/` adapters, container getters, `cmd/` routes or commands, and `config/` sub-structs. A task that puts a rule in an adapter or a controller is a plan defect.
-- **`/implementing-plans`.** Each task goes in this order:
+- **`/write-specs`.** The spec's "Data and contracts" section names the contracts a feature needs. Tables, endpoints and config keys are adapter or config details, not rules.
+- **`/plan-slices`.** For each task, the plan's contracts list the new `port/contract` interfaces and DTOs, `domain/` packages and services, `infrastructure/` adapters, container getters, `cmd/` routes or commands, and `config/` sub-structs. A task that puts a rule in an adapter or a controller is a plan defect.
+- **`/implement-plans`.** Each task goes in this order:
   1. `port/` (contract, DTO, mock);
   2. `domain/` (rules, then the service, tested with mocks);
   3. `infrastructure/` (integration-tested);
   4. `config/`;
   5. `container/` (getter);
   6. `cmd/` (route or command).
-- **`/reviewing-changes`.** Reviewers run `scripts/check-layers.sh` first. They flag dependency-direction violations, rules in `infrastructure/` or `cmd/`, getters that read fields instead of getters, infrastructure getters returning concrete types, `container/` imported by `domain/`, and services that receive the whole `*config.Config` instead of their sub-struct.
+- **`/review-changes`.** Reviewers run `scripts/check-layers.sh` first. They flag dependency-direction violations, rules in `infrastructure/` or `cmd/`, getters that read fields instead of getters, infrastructure getters returning concrete types, `container/` imported by `domain/`, and services that receive the whole `*config.Config` instead of their sub-struct.
 
 ## Enforcing it
 

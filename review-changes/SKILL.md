@@ -1,5 +1,5 @@
 ---
-name: reviewing-changes
+name: review-changes
 description: Reviews the code of a finished batch once, with one reviewer over all parallel lanes' work, checking the seams between lanes first; writes a rulings file, dispatches 1-3 fixers split by area and re-reviews only Important findings or worse. Use when every lane of a batch is merged and the fast checks are green, or after review fixes land.
 disable-model-invocation: true
 ---
@@ -25,7 +25,7 @@ Review is the safety net for light plans, and the same flow serves bug-fix batch
 
 ## Steps
 
-1. **Layers.** If the project enforces layer rules, run its check (for the hexagonal layout: `~/.claude/skills/applying-hexagonal-architecture/scripts/check-layers.sh`, when the repo has `layers.rules`). A violation is an Important finding.
+1. **Layers.** If the project enforces layer rules, run its check (for the hexagonal layout: `~/.claude/skills/apply-hexagonal-architecture/scripts/check-layers.sh`, when the repo has `layers.rules`). A violation is an Important finding.
 2. **Package.** Run `shared/scripts/review-package.sh <base-before-plan> HEAD .agent-work/reviews/<plan>`. That produces `code.diff` (no tests, no generated files), `tests.stat` and `commits.txt`. Exclude another plan's commits from the range.
 3. **Review.** Start only when every lane of the batch is merged. Dispatch ONE `reviewer` over all the changes at once, not one per lane or per task. Its first focus is the cross-lane seams: parallel lanes cannot see each other, so wire and field names, shared stores, call chains and feature flags are where they disagree, and where a trial's Important findings were. Give it:
    - the plan (the authority);
@@ -37,7 +37,7 @@ Review is the safety net for light plans, and the same flow serves bug-fix batch
    - each finding with its location, marked FIX, KEEP (recorded deviation) or RECORD (follow-up);
    - your choice wherever the reviewer offered options;
    - any user question the review surfaced. Ask the user before dispatching, for example "10% of max or of missing?".
-5. **Fix.** Split the FIX findings by where they were found: findings in the same files or subsystem go to the same fixer, so it loads that context once (10 issues in one place means one fixer). Use 1–3 **fresh** `implementer` agents (the fixers), each with its part of the rulings file and the agent-rules blocks: one commit per fix, a test per fix, targeted tests only. Each also writes the owed tests of its area that the lanes skipped or ran out of budget for. The slow gates belong to one tester (`/testing-changes`), which loops with the fixers until green. The same flow applies to bug-fix batches and follow-up sweeps.
+5. **Fix.** Split the FIX findings by where they were found: findings in the same files or subsystem go to the same fixer, so it loads that context once (10 issues in one place means one fixer). Use 1–3 **fresh** `implementer` agents (the fixers), each with its part of the rulings file and the agent-rules blocks: one commit per fix, a test per fix, targeted tests only. Each also writes the owed tests of its area that the lanes skipped or ran out of budget for. The slow gates belong to one tester (`/test-changes`), which loops with the fixers until green. The same flow applies to bug-fix batches and follow-up sweeps.
 6. **Re-review only if the review found Important or worse.** Package just the fix commits and dispatch a scoped `reviewer` (about 50–130k tokens). For a fix of a few lines, read the diff yourself instead. If the findings were only Minor or Low and each fix has a test, skip the re-review.
 7. **Close.** Fix any Low leftovers yourself if they're trivial (a stale comment, say). Log the rest as open items in `docs/decisions.md`, and record the loop's cost in `.agent-work/workflow-metrics.md`.
 

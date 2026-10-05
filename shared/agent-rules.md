@@ -31,7 +31,7 @@ When a plan builds as lanes, paste `shared/lane-rules.md` (filled in) instead of
 
 ## Gate cadence
 
-Paste the block for the project's profile (from `/testing-changes`, recorded in `.agent-work/STATE.md`).
+Paste the block for the project's profile (from `/test-changes`, recorded in `.agent-work/STATE.md`).
 
 **Fast profile** (full gate up to about 3 minutes):
 - Write the failing test first and watch it fail, then make it pass.
@@ -56,7 +56,7 @@ Paste the block for the project's profile (from `/testing-changes`, recorded in 
 
 ## Architecture
 
-- Follow the project's own architecture rules (its AGENTS.md/CLAUDE.md, existing layout). Only if the project uses the hexagonal layout, paste the rules from the `applying-hexagonal-architecture` skill ("Rules agents follow").
+- Follow the project's own architecture rules (its AGENTS.md/CLAUDE.md, existing layout). Only if the project uses the hexagonal layout, paste the rules from the `apply-hexagonal-architecture` skill ("Rules agents follow").
 
 ## Scope
 

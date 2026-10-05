@@ -1,5 +1,5 @@
 ---
-name: planning-slices
+name: plan-slices
 description: Turns one roadmap slice into a light implementation plan (150-300 lines, no code): question scout, user decisions quoted verbatim, contracts and tests per task, a wave table with lanes and a file ownership table for parallel builds, and a design review for risky plans. Use when the next roadmap item needs a plan, or a plan must be split or revised.
 disable-model-invocation: true
 ---
@@ -41,17 +41,17 @@ A plan should cost a small fraction of what its build costs. Measured on this wo
 2. **Ask.**
    - Put proposed features to the user as multi-select "keep which?" questions, up to 4 options each.
    - Ask only the questions that change user-visible behaviour. Decide engineering questions yourself.
-   - Ask in the format `/orchestrating-development` sets out: one decision at a time, a Background paragraph that explains every project term in plain words, and options that say what the user would see and what each costs.
+   - Ask in the format `/orchestrate-development` sets out: one decision at a time, a Background paragraph that explains every project term in plain words, and options that say what the user would see and what each costs.
    - Before you recommend keeping a proposed feature, check with one grep that the data or server support it needs exists. A scout once marked features "keep" that had no backend at all.
    - Record every answer verbatim in `docs/decisions.md`, along with your defaults.
    - When an answer is a sentence, a refusal or "I don't know what this means", read it literally. Rephrase the question in user terms, or drop the feature.
 3. **Light plan.** Dispatch an `implementer` (medium). Give it the questions file, the decisions section, and the model plan to copy (the last good light plan). Required sections:
    - Scope and deferrals (including what was cut).
    - User decisions, quoted verbatim.
-   - Contracts per task, named in the project's own layering: the new interfaces, data types, packages or modules, adapters, wiring, routes or commands and config. For a hexagonal project, list them by folder as the `applying-hexagonal-architecture` skill describes. Also units and lock order, new tables, events and jobs, wire and read changes, statement or performance budgets for new units.
+   - Contracts per task, named in the project's own layering: the new interfaces, data types, packages or modules, adapters, wiring, routes or commands and config. For a hexagonal project, list them by folder as the `apply-hexagonal-architecture` skill describes. Also units and lock order, new tables, events and jobs, wire and read changes, statement or performance budgets for new units.
    - Tasks: 8–12, each naming its required tests, including multi-replica races for anything several actors write.
    - **Wave table:** the tasks grouped into waves. Tasks in one wave are independent of each other. When lanes share types, wave 0 is a tiny "seams and types only" task that defines them.
-   - **Lanes:** at most 4–5 implementer lanes per wave, 3–5 tasks each, grouped by area (the same files or subsystem) so each agent loads little context. A plan whose tasks all depend on each other has one task per wave; `/implementing-plans` then builds it in sequential halves.
+   - **Lanes:** at most 4–5 implementer lanes per wave, 3–5 tasks each, grouped by area (the same files or subsystem) so each agent loads little context. A plan whose tasks all depend on each other has one task per wave; `/implement-plans` then builds it in sequential halves.
    - **File ownership table:** one owner lane for every shared file or resource: size budgets, docs, shared contracts and wire types, generated goldens, statement and performance pins, i18n and name tables, feature flags. Non-owners write "Notes for the merge" in their ledger instead of editing. A shared file with no owner is a plan defect.
    - Gates.
    - Hand-off notes.

@@ -19,39 +19,39 @@ Claude Code skills for building software with subagents. You make the product de
 
 | # | Skill | When you use it | What you get |
 |---|---|---|---|
-| 0 | `/orchestrating-development` | At the start of every session and after a `/compact` | The controller loop: resume from the state files, pick the next plan, run stages 2–5, record tokens and quota |
-| 1 | `/writing-specs` | Once per new area of the product, before any plan touches it | An approved spec in which every feature is marked `[USER]`, `[PROPOSED]` or `[DEFAULT]` |
-| 2 | `/planning-slices` | Once per roadmap slice (a "plan") | A committed light plan, 150–300 lines, quoting your decisions verbatim, with a wave table, lanes and a file ownership table |
-| 3 | `/implementing-plans` | Right after the plan is committed | Parallel lanes of 3–5 same-area tasks (one worktree each), all merged once with fast checks green; two sequential halves when tasks all depend on each other |
-| 4 | `/testing-changes` | Reference, used during stage 3 and before merges | The test cadence, the single tester that runs the full gate and browser suite, how to wait on long runs, flaky-test triage, screenshot review |
-| 5 | `/reviewing-changes` | Right after the build's gate is green | One review over the whole batch (cross-lane seams first), fixed by 1–3 fixers split by area, open items logged |
+| 0 | `/orchestrate-development` | At the start of every session and after a `/compact` | The controller loop: resume from the state files, pick the next plan, run stages 2–5, record tokens and quota |
+| 1 | `/write-specs` | Once per new area of the product, before any plan touches it | An approved spec in which every feature is marked `[USER]`, `[PROPOSED]` or `[DEFAULT]` |
+| 2 | `/plan-slices` | Once per roadmap slice (a "plan") | A committed light plan, 150–300 lines, quoting your decisions verbatim, with a wave table, lanes and a file ownership table |
+| 3 | `/implement-plans` | Right after the plan is committed | Parallel lanes of 3–5 same-area tasks (one worktree each), all merged once with fast checks green; two sequential halves when tasks all depend on each other |
+| 4 | `/test-changes` | Reference, used during stage 3 and before merges | The test cadence, the single tester that runs the full gate and browser suite, how to wait on long runs, flaky-test triage, screenshot review |
+| 5 | `/review-changes` | Right after the build's gate is green | One review over the whole batch (cross-lane seams first), fixed by 1–3 fixers split by area, open items logged |
 | – | `/unslop` | Whenever prose is written for people | Specs, plans, docs and messages without AI writing patterns |
-| – | `/applying-hexagonal-architecture` | Only in projects on the hexagonal layout | The layout, service-container rules and layer check the other skills apply there |
+| – | `/apply-hexagonal-architecture` | Only in projects on the hexagonal layout | The layout, service-container rules and layer check the other skills apply there |
 
 Then merge, update the state files, `/compact`, and start the next plan at stage 2.
 
 ```
-/writing-specs          (once per new area)
+/write-specs          (once per new area)
       │
       ▼
-┌─► /planning-slices ──► /implementing-plans ──► /reviewing-changes ──► merge + /compact ─┐
+┌─► /plan-slices ──► /implement-plans ──► /review-changes ──► merge + /compact ─┐
 │            (lanes in batches; then one merge, one review, 1-3 fixers, one tester)     │
 └─────────────────────────────────── next plan ───────────────────────────────────────┘
 ```
 
 ## What each one asks of you
 
-- **`/writing-specs`.** You answer product questions in batches of up to 4. You then go through every agent-proposed feature and choose keep or cut. Last, you approve the written spec.
-- **`/planning-slices`.** You answer up to about 8 questions per plan, mostly keep/cut on proposed features plus the product choices the spec leaves open. Engineering questions are decided for you and logged.
-- **`/implementing-plans`.** Nothing, unless an agent reports a concern that needs a product decision. For UI and visual art work, you approve the renders and screenshots before they are committed. The controller also asks for your weekly quota percentage at the build's start, after it and when the gate is green.
-- **`/testing-changes`.** Nothing. It is the agents' and the controller's reference.
-- **`/reviewing-changes`.** Sometimes one question, when a finding turns out to be a product choice (for example "10% of max or of missing?").
+- **`/write-specs`.** You answer product questions in batches of up to 4. You then go through every agent-proposed feature and choose keep or cut. Last, you approve the written spec.
+- **`/plan-slices`.** You answer up to about 8 questions per plan, mostly keep/cut on proposed features plus the product choices the spec leaves open. Engineering questions are decided for you and logged.
+- **`/implement-plans`.** Nothing, unless an agent reports a concern that needs a product decision. For UI and visual art work, you approve the renders and screenshots before they are committed. The controller also asks for your weekly quota percentage at the build's start, after it and when the gate is green.
+- **`/test-changes`.** Nothing. It is the agents' and the controller's reference.
+- **`/review-changes`.** Sometimes one question, when a finding turns out to be a product choice (for example "10% of max or of missing?").
 
 When you are away, the controller decides with a recommended default, logs it in `docs/decisions.md` as its own ruling, and keeps going. You can overrule it later.
 
 ## A typical session
 
-1. Run `/orchestrating-development`. The controller reads `.agent-work/STATE.md`, says where things stand, and starts the next plan.
+1. Run `/orchestrate-development`. The controller reads `.agent-work/STATE.md`, says where things stand, and starts the next plan.
 2. Answer the plan's questions when they appear.
 3. Wait. The controller replies with one short line per agent notification. A plan takes a few hours of wall clock: the build as parallel lanes (3–5 same-area tasks each, at most 4–5 lanes at a time, fast tests only; about 70 minutes for 20 tasks), then, once every lane is done, one merge, one review, 1–3 fixers and one test loop. Only a green result reaches the main branch, and nothing arrives lane by lane.
 4. When a plan merges, the controller suggests `/compact`. Run it, because the controller's context is re-read on every notification.
@@ -73,7 +73,7 @@ Local in `.agent-work/` (git-ignored), because they belong to one machine and on
 
 The workflow skills are architecture-neutral: specs, plans, builds and reviews follow whatever the project's AGENTS.md or CLAUDE.md and existing layout say.
 
-For projects on the hexagonal (ports and adapters) layout (`main.go`, `cmd/`, `config/`, `container/`, `domain/`, `infrastructure/`, `port/{contract,dto,mock}`), there is a separate skill, `/applying-hexagonal-architecture`. It covers the folder roles, the lazy service container and its eight rules, the new-dependency checklist, and a sample `layers.rules` with `applying-hexagonal-architecture/scripts/check-layers.sh`, the import checker. When a project uses that layout, the workflow skills apply it:
+For projects on the hexagonal (ports and adapters) layout (`main.go`, `cmd/`, `config/`, `container/`, `domain/`, `infrastructure/`, `port/{contract,dto,mock}`), there is a separate skill, `/apply-hexagonal-architecture`. It covers the folder roles, the lazy service container and its eight rules, the new-dependency checklist, and a sample `layers.rules` with `apply-hexagonal-architecture/scripts/check-layers.sh`, the import checker. When a project uses that layout, the workflow skills apply it:
 - specs name the ports;
 - plans list contracts by folder;
 - implementers build `port/` → `domain/` → `infrastructure/` → `config/` → `container/` → `cmd/`;
@@ -84,7 +84,7 @@ Other projects never load it.
 ## Shared material
 
 - **`shared/agent-rules.md`:** the rule blocks the controller pastes into every subagent prompt. It covers which model to use, token and tool-call discipline, waiting on long runs, test cadence, commits, scope, hand-off and the short return format. Edit this file to change how every agent behaves.
-- **`shared/lane-rules.md`:** the template of a lane-rules file: read-first list, ownership rule, under-a-minute tests, token discipline, commit rules, ledger format, hand-off at about 450k tokens and the return contract. `/implementing-plans` copies it once per plan so each lane's prompt is a few lines.
+- **`shared/lane-rules.md`:** the template of a lane-rules file: read-first list, ownership rule, under-a-minute tests, token discipline, commit rules, ledger format, hand-off at about 450k tokens and the return contract. `/implement-plans` copies it once per plan so each lane's prompt is a few lines.
 - **`shared/scripts/`:**
 
 | Script | Does |
@@ -118,7 +118,7 @@ Nothing runs below Sonnet 5.5. Sonnet 5.5 medium is the default for code includi
 
 ## Test profiles
 
-`/testing-changes` has two cadences. Time the full gate once per project and record the profile in `.agent-work/STATE.md`:
+`/test-changes` has two cadences. Time the full gate once per project and record the profile in `.agent-work/STATE.md`:
 - **Fast** (gate up to about 3 minutes, e2e up to about 5): test first, full gate before every commit. This is the usual recommended practice.
 - **Slow** (longer gates, shared databases or browsers): targeted checks per commit, one full gate per plan. This is the token-optimised cadence built on one project, where a full gate plus e2e took 1–2 hours.
 
@@ -162,4 +162,4 @@ These skills follow Anthropic's skill-authoring best practices (platform.claude.
 - References to other skills are steps inside a stage, never standing rules. Each names the context it loads in (usually a subagent's) and what happens when that skill isn't installed. A skill's body loads only when a step uses it, so a reference costs nothing until then. Each reference also says to load the skill once per context: after the first load its rules are already in context and can be applied without loading it again.
 - No path on the author's machine. Inside a skill, paths are relative to the skill's folder; each skill that uses `shared/` has a `shared` link to it, and other skills are found in `~/.claude/skills/<name>/`. The controller writes full paths into subagent prompts.
 - Scripts are run, not read. Each one documents its usage in its header.
-- Names use the recommended gerund form (`writing-specs`, `planning-slices` …).
+- Names use the recommended gerund form (`write-specs`, `plan-slices` …).

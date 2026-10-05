@@ -1,5 +1,5 @@
 ---
-name: implementing-plans
+name: implement-plans
 description: Builds a committed plan with implementer subagents, by default as parallel lanes (one git worktree and branch per lane, a wave table, file ownership, a merge agent), or in two sequential halves when every task depends on the previous one. Use right after a plan is committed, or to resume a half-built plan.
 disable-model-invocation: true
 ---
@@ -16,7 +16,7 @@ Build progress (parallel lanes, the default):
 - [ ] 4. Each batch: lanes dispatched together; WAIT for every lane; reports read, metrics logged
 - [ ] 5. Merge agent: all lanes merged once (--no-ff), notes applied, fast checks green, owed-to-tester list written
 - [ ] 6. Art lanes: renders approved by the user before commit
-- [ ] 7. Hand over to /reviewing-changes (one review, 1-3 fixers, one tester); main branch only after green
+- [ ] 7. Hand over to /review-changes (one review, 1-3 fixers, one tester); main branch only after green
 ```
 
 Sequential fallback checklist:
@@ -32,11 +32,11 @@ Build progress (sequential halves):
 
 Contents: Choose the mode · Parallel lanes · Sequential halves · Watch for
 
-A subagent's context cannot be compacted, and every tool call re-reads all of it, so cost grows with the length of one agent's run. Lanes keep every agent short and run side by side. Measured on one 20-task plan: sequential halves cost 158–189k Sonnet tokens and 29–40 minutes per task; four parallel lanes cost about 98k tokens and 3.5 minutes per task, 20 tasks in about 70 minutes. Bug-fix batches of 3 lanes × 4 tasks took about 4–6 minutes per lane on Sonnet medium. Review, fix and test costs come on top (see `/reviewing-changes` and `/testing-changes`).
+A subagent's context cannot be compacted, and every tool call re-reads all of it, so cost grows with the length of one agent's run. Lanes keep every agent short and run side by side. Measured on one 20-task plan: sequential halves cost 158–189k Sonnet tokens and 29–40 minutes per task; four parallel lanes cost about 98k tokens and 3.5 minutes per task, 20 tasks in about 70 minutes. Bug-fix batches of 3 lanes × 4 tasks took about 4–6 minutes per lane on Sonnet medium. Review, fix and test costs come on top (see `/review-changes` and `/test-changes`).
 
 ## Choose the mode
 
-Use **parallel lanes** when the plan has a wave table and a file ownership table (`/planning-slices`). Use **sequential halves** only when the tasks all depend on each other, so no wave holds more than one task. If the plan has no wave table, send it back to `/planning-slices` first.
+Use **parallel lanes** when the plan has a wave table and a file ownership table (`/plan-slices`). Use **sequential halves** only when the tasks all depend on each other, so no wave holds more than one task. If the plan has no wave table, send it back to `/plan-slices` first.
 
 ## Parallel lanes
 
@@ -46,13 +46,13 @@ Use **parallel lanes** when the plan has a wave table and a file ownership table
 4. **Dispatch each wave.** At most 4–5 `implementer` agents per wave, all dispatched in one message. A lane holds 3–5 tasks, grouped by area (the same files or subsystem), so the agent loads as little context as possible. The same flow applies to bug-fix batches and follow-up sweeps. A lane may edit only files it owns (the plan's ownership table). For a file it does not own it writes a line under "Notes for the merge" in its ledger and does not edit. Each prompt carries:
    - the lane name, worktree path, task numbers and plan path;
    - the lane-rules path and the binding decisions section;
-   - `docs/terminology.md`, and for a hexagonal project the build order of `/applying-hexagonal-architecture`.
-5. **Lane tests.** Lanes run only fast tests, each under a minute. Never the full gate, the browser or e2e suites, or a database suite: the tester runs those later. Whatever a lane skips for that reason goes in its ledger under "Owed to the tester". Tests a lane cannot finish within its budget go in the ledger under owed work, and the fixers write them (`/reviewing-changes`).
+   - `docs/terminology.md`, and for a hexagonal project the build order of `/apply-hexagonal-architecture`.
+5. **Lane tests.** Lanes run only fast tests, each under a minute. Never the full gate, the browser or e2e suites, or a database suite: the tester runs those later. Whatever a lane skips for that reason goes in its ledger under "Owed to the tester". Tests a lane cannot finish within its budget go in the ledger under owed work, and the fixers write them (`/review-changes`).
 6. **Ledger.** Each lane keeps `.agent-work/plans-run/<plan>/lane-x.md` with one line per task and commit, the sections "Notes for the merge" and "Owed to the tester", and a HAND-OFF section if it stops early. A lane stops at its budget and leaves the rest as owed work; it does not squeeze work in.
 7. **Merge agent.** Wait for EVERY lane of the batch to finish. Never merge or review a partial batch, and review as many tasks at once as possible. Then dispatch one `implementer` that merges every lane branch with `--no-ff`, applies each lane's "Notes for the merge" to the files it owns, resolves conflicts (regenerate generated files rather than hand-merging them), runs the fast checks and writes one combined owed-to-tester list. Later waves branch from the merged base. The merge goes to the integration branch only; the main branch waits for the tester's green gate.
-8. **Art and asset lanes.** Visual art lanes (3D models, icons, portraits, VFX) run on Opus 5.5, in parallel with the code lanes. Audio and music generation runs on Sonnet 5.5 (`shared/agent-rules.md`, Models). Renders are not committed until the user has approved them at an art checkpoint (`/testing-changes`, screenshot baselines). Report their tokens separately from the code lanes.
+8. **Art and asset lanes.** Visual art lanes (3D models, icons, portraits, VFX) run on Opus 5.5, in parallel with the code lanes. Audio and music generation runs on Sonnet 5.5 (`shared/agent-rules.md`, Models). Renders are not committed until the user has approved them at an art checkpoint (`/test-changes`, screenshot baselines). Report their tokens separately from the code lanes.
 9. **Metrics.** Record each agent's tokens, tool calls and wall clock in `.agent-work/workflow-metrics.md`.
-10. **Done when** every lane is merged, the fast checks are green on the merged base, and the combined owed-to-tester list exists. Then run `/reviewing-changes`. The full gate belongs to the tester, not to this stage.
+10. **Done when** every lane is merged, the fast checks are green on the merged base, and the combined owed-to-tester list exists. Then run `/review-changes`. The full gate belongs to the tester, not to this stage.
 
 ## Sequential halves
 
@@ -61,17 +61,17 @@ For plans whose tasks all depend on each other. One implementer builds a run of 
 1. **Dispatch the first half** (Tasks 1–6, or about 500k tokens' worth). The prompt carries:
    - one line on where the plan fits;
    - the plan path and the decisions section with the binding decisions (and the cut features to leave out);
-   - which AGENTS.md sections to read, and the project's architecture rules. For a hexagonal project (the `applying-hexagonal-architecture` skill), each task goes `port/` → `domain/` → `infrastructure/` → `config/` → `container/` → `cmd/`;
+   - which AGENTS.md sections to read, and the project's architecture rules. For a hexagonal project (the `apply-hexagonal-architecture` skill), each task goes `port/` → `domain/` → `infrastructure/` → `config/` → `container/` → `cmd/`;
    - `docs/terminology.md`: use its names, and add a term in the same commit that introduces it in code or UI;
    - the progress file path, `.agent-work/plans-run/<plan>/progress.md`;
    - the blocks from `shared/agent-rules.md`: token and tool-call discipline, waiting, gate cadence for the project's test profile (Slow: targeted checks only, **no full gate in this half**; Fast: test first, full gate before every commit), commits (every commit builds), scope, hand-off and the return contract.
 2. **Read the first half's report** (5–10 lines). Record its tokens and tool calls in `.agent-work/workflow-metrics.md`. Check its deviations against the decisions file. Turn any concern into an instruction for the second half.
 3. **Dispatch the second half** to a fresh agent. Its prompt has the HAND-OFF section first, then the remaining tasks and the same blocks. Add:
    - any concern from step 2 as an explicit fix;
-   - the full gate after the last task (see `/testing-changes`), fixed and rerun until green;
+   - the full gate after the last task (see `/test-changes`), fixed and rerun until green;
    - stop and write a HAND-OFF section at about 500k tokens, before finishing.
-4. **UI plans:** the final gate includes the full e2e suite. New or changed screenshot baselines stay uncommitted. Copies go to `.agent-work/shots/<plan>/{before,after}`, and the agent STOPS for the controller's image review (`/testing-changes`).
-5. **Done when** every task is committed, the progress file has one line per task, and the gate log ends in `EXIT 0`. Then run `/reviewing-changes`.
+4. **UI plans:** the final gate includes the full e2e suite. New or changed screenshot baselines stay uncommitted. Copies go to `.agent-work/shots/<plan>/{before,after}`, and the agent STOPS for the controller's image review (`/test-changes`).
+5. **Done when** every task is committed, the progress file has one line per task, and the gate log ends in `EXIT 0`. Then run `/review-changes`.
 
 ## Watch for
 
