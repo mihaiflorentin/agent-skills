@@ -4,7 +4,7 @@ description: Sets the test cadence for agent-built work: targeted checks per com
 disable-model-invocation: true
 ---
 
-# Test workflow
+# Test changes
 
 Contents: Pick a profile · Cadence: Fast profile · Cadence: Slow profile · The tester (parallel lanes) · Long runs · Flaky tests · Screenshot baselines
 
@@ -21,6 +21,8 @@ Time the project's full gate once, from a warm cache, and record the profile in 
 
 A project can mix them per suite. For example, fast unit tests and a slow browser suite: use Fast for the unit gate and Slow for the e2e suite.
 
+Under parallel lanes, lanes and fixers always run fast targeted checks only; the Fast profile's per-commit gate applies only to a single sequential agent; the full gate runs in the tester.
+
 ## Cadence: Fast profile
 
 This is the recommended practice for most projects.
@@ -29,14 +31,14 @@ This is the recommended practice for most projects.
 |---|---|
 | Each task | Test first. Write the failing test, watch it fail for the expected reason, write the code, and watch it pass. |
 | Before each commit | The full gate, run as one blocking call. A commit goes in only when the gate is green. |
-| UI task | The e2e specs of the touched area. The whole e2e suite too, if it fits the 5-minute budget. |
+| UI task | The e2e specs of the touched area. The whole e2e suite too, if it fits within 5 minutes. |
 | End of plan | The full gate plus the full e2e suite once more, on the final commit. |
 | After review fixes | The full gate after each fix. |
 | Before a merge | The pre-merge gate. |
 
 ## Cadence: Slow profile
 
-This is token-optimised for long gates, as used on one project, where `make check` plus e2e took 1–2 hours. Running the gate once per plan instead of once per task saved most of the waiting and the reruns, and caught no fewer bugs.
+This is token-optimised for long gates (a full gate plus e2e of 1–2 hours): running the gate once per plan instead of once per task saves most of the waiting and the reruns. The evidence is in the README ("Measured").
 
 | When | Run |
 |---|---|
@@ -48,11 +50,11 @@ This is token-optimised for long gates, as used on one project, where `make chec
 
 ## The tester (parallel lanes)
 
-When a plan was built as parallel lanes, lanes run only fast tests (under a minute each), so the slow gates move to one place: ONE tester agent, after the merge, the one review and the fixers.
+When a plan was built as parallel lanes, lanes run only fast tests (under a minute each), so the slow gates move to one place: ONE tester agent, after the merge, the one review and the fixers. Dispatch it as a `test-runner` agent if the user's setup has that type, otherwise as an `implementer`.
 - It reads the combined owed-to-tester list and runs the full gate and the full browser suite (the Slow profile's end-of-plan run), in the background with `run-logged.sh`.
 - Specs that advance shared clocks or other global state run last, or on a fresh server.
 - On a failure it reruns that test alone before treating it as real. Under heavy parallel load, load-sensitive tests flake; a pass alone is a flake, to be fixed at the root.
-- A real failure goes back to the fixer that owns that area (`/review-changes`) with the log path. The tester and the fixers loop until green. Only then does the work merge to the working branch and get pushed. Nothing reaches it lane by lane.
+- A real failure goes back to the fixer that owns that area (`/review-changes`) with the log path. The tester and the fixers loop until green. The tester runs the pre-merge gate before the merge into the working branch; only then does the work merge and get pushed. Nothing reaches the working branch lane by lane.
 
 ## Long runs
 
@@ -63,7 +65,7 @@ These apply in both profiles whenever a run takes more than about 2 minutes.
 - Never wait with `tail -f | grep`, sleep or `pgrep` loops. A `tail -f` hung for 56 minutes after its run had finished, and another such wait hung for 5 hours. If something seems stuck, run `shared/scripts/stale-waits.sh`.
 - A duplicate waiter on a run that is still going is harmless. Report it rather than killing it, and kill a process only when it is stuck (its log already ends in `EXIT n`) or orphaned.
 - A stray `&` inside a foreground command leaves an orphaned run with no completion notice. Kill it and restart it properly.
-- On a 16-thread machine, heavy integration suites flake under `-j16`. If the gate fails only on load-sensitive tests, rerun with `-j4` before investigating.
+- Heavy integration suites can flake under full parallelism. If the gate fails only on load-sensitive tests, rerun with lower parallelism (for example `-j4`) before investigating.
 
 ## Flaky tests
 

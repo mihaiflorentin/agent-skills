@@ -12,7 +12,7 @@ Paste the relevant blocks into every subagent prompt, with every script path wri
 
 Every tool call re-reads the agent's whole context, so the cost is about calls × context size.
 
-- **Logs, not output.** Send test and build output to a file. Read only `grep -E 'FAIL|panic|DATA RACE|Error|×'` plus `tail -5`.
+- **Logs, not output.** Send test and build output to a file. Read only the failure markers of the project's test tools (for example `grep -E 'FAIL|panic|Error'`) plus `tail -5`.
 - **Slices, not files.** Locate code with LSP (definition, references, hover) first, then grep plus a line-range read. Never read a whole large file.
 - **Batch.** Send independent reads and lookups as parallel calls in one message. Chain shell steps in one command.
 - **Trust the edit.** Never re-read a file to check an edit you just made.
@@ -35,7 +35,7 @@ Paste the block for the project's profile (from `/test-changes`, recorded in `.a
 
 **Fast profile** (full gate up to about 3 minutes):
 - Write the failing test first and watch it fail, then make it pass.
-- Run the full gate before every commit; commit only when it is green.
+- Run the full gate before every commit; commit only when it is green. This applies to a single sequential agent only; lanes and fixers run fast targeted checks only.
 - UI tasks run the touched e2e specs, and the whole suite if it takes 5 minutes or less.
 
 **Slow profile** (longer gates):
@@ -51,7 +51,7 @@ Paste the block for the project's profile (from `/test-changes`, recorded in `.a
 - Use conventional style, one logical change per commit, with an explicit `git add <paths>`.
 - **Every commit builds.** Chain the build (`go build ./...`, `tsc --noEmit`) before `git commit`.
 - Never amend, never push, never use a bare `git stash`, and never commit controller scratch (`.agent-work/`).
-- When another agent commits in the same checkout, write files only and let the controller commit with `git commit -m … -- <paths>`. See `scripts/commit-only.sh`.
+- When another agent commits in the same checkout, write files only and let the controller commit with `git commit -m … -- <paths>`. See `shared/scripts/commit-only.sh`.
 - End messages with the project's attribution lines.
 
 ## Architecture
@@ -63,7 +63,7 @@ Paste the block for the project's profile (from `/test-changes`, recorded in `.a
 - Build only what the plan and the user's decisions name. If a product question is genuinely open, take the option closest to the plan, log it as a deviation and continue.
 - Use the names in `docs/terminology.md`. A new business or technical term goes into it in the same commit that introduces it. `docs/` is committed; `.agent-work/` never is.
 - Subagents never dispatch subagents and never retry a refused permission.
-- **Hand-off.** At about 500k tokens, or after 6 tasks, stop after a committed task. Write a HAND-OFF section in the progress file covering the seams, the gotchas and the work still owed. A fresh agent continues from there, because a subagent's context cannot be compacted.
+- **Hand-off.** When the context gets long (about 450k tokens), stop after a committed task. Write a HAND-OFF section in the progress file covering the seams, the gotchas and the tasks still to do. A fresh agent continues from there, because a subagent's context cannot be compacted.
 
 ## Return contract
 

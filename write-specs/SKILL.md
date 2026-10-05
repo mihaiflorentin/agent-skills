@@ -4,7 +4,7 @@ description: Writes or extends a design spec with the user: research brief, prod
 disable-model-invocation: true
 ---
 
-# Specs workflow
+# Write specs
 
 Copy this checklist and tick it off as you go:
 
@@ -23,7 +23,7 @@ Spec progress:
 
 Contents: Steps · Spec template · Why the flow looks like this
 
-A spec says what the software must do and why. Plans argue from it, so an unexamined spec line turns into code. The most expensive spec defect is a **proposal posing as a decision**: a feature an agent invented that nobody ever put to the user. That is how daily quests got into a product whose owner never asked for them.
+A spec says what the software must do and why. Plans argue from it, so an unexamined spec line turns into code. The most expensive spec defect is a **proposal posing as a decision**: a feature an agent invented that nobody ever put to the user. That is how a feature nobody asked for gets built.
 
 ## Steps
 

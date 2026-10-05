@@ -24,7 +24,9 @@ docs/
 .agent-work/                      git-ignored scratch, one machine only                  (never commit)
   STATE.md                        resume point: running agents, the next step
   workflow-metrics.md             tokens, tool calls and hours per stage
-  plans-run/<plan>/progress.md    the implementers' ledger and HAND-OFF section
+  plans-run/<plan>/progress.md    the implementers' ledger and HAND-OFF section (sequential builds)
+  plans-run/<plan>/lane-rules.md  the lane rules, filled in once per plan
+  plans-run/<plan>/lane-<x>.md    one lane's ledger and HAND-OFF section
   questions/<plan>.md             the question scout's output
   reviews/<plan>/                 review package (code.diff, tests.stat, commits.txt) and rulings.md
   shots/<plan>/{before,after}/    screenshots waiting for review
@@ -85,6 +87,7 @@ The plans in build order, one line each: name, status (planned, in progress, don
 - **`STATE.md`:** a RESUME block with what is done, which agents are running (id, worktree, what each ends with) and what comes next. Add an `UPDATE n` line after each plan boundary, merge or dispatch; never rewrite earlier lines. After a `/compact` or a new session, read it first and trust it, together with `git log`, over your own recollection.
 - **`workflow-metrics.md`:** one row per plan stage (tokens, tool calls, hours, what the gate needed). These rows are the evidence for every workflow change.
 - **`plans-run/<plan>/progress.md`:** the implementer's ledger, one line per task with its commits and deviations, plus a HAND-OFF section for the next implementer and the reviewer.
+- **`plans-run/<plan>/lane-rules.md` and `lane-<x>.md`:** for a parallel build, the filled-in lane rules and each lane's ledger (tasks, deviations, notes for the merge, owed to the tester, HAND-OFF).
 - **Compact at plan boundaries.** The controller's context is re-read on every agent notification. Suggest `/compact` once a plan merges and `STATE.md` is current.
 
 ## Setting up a new project

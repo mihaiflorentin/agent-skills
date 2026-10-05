@@ -18,7 +18,7 @@ Read only these, in this order, and only the parts that matter to your tasks:
 ## Ownership
 
 - Work only in your own worktree and on your own branch.
-- Edit only the files your lane owns, as the plan's file ownership table says. Shared files (size budgets, docs, shared contracts and wire types, generated goldens, statement and performance pins, i18n and name tables, feature flags) each have one owner lane.
+- Edit only the files your lane owns, as the plan's file ownership table says. Shared files (where the project has them: size budgets, docs, shared contracts and wire types, generated goldens, statement and performance pins, i18n and name tables, feature flags) each have one owner lane.
 - For a shared file you do not own, do not edit it. Write what the owner or the merge agent must change, with file, name and exact value, under "Notes for the merge" in your ledger.
 - If your task cannot be done without breaking this rule, stop that task, record it in the ledger and go on to the next.
 
@@ -37,7 +37,7 @@ Every tool call re-reads your whole context, so cost is calls times context size
 - Batch independent reads in one message. Chain shell steps in one command.
 - Never re-read a file to check an edit you just made.
 - Never wait with `sleep`, `tail -f` or `pgrep` loops. Run long commands in the background and wait for the notice, or make one blocking call.
-- Finish every task of your lane, each with its tests. Never leave a task or a test as owed work. If your context gets long, hand off (below) and a fresh agent finishes the lane.
+- Finish every task of your lane, each with its tests. Never leave a task or a test undone. If your context gets long, hand off (below) and a fresh agent finishes the lane.
 
 ## Commits
 
@@ -56,7 +56,7 @@ Keep `.agent-work/plans-run/<plan>/lane-<x>.md`, one line per task with its comm
 
 ## Hand-off
 
-When your context gets long (around 450k tokens), stop after a committed task and write a HAND-OFF section in your ledger: the seams, the gotchas and the tasks still to do. A fresh agent continues from it and finishes the lane.
+When your context gets long (around 450k tokens), stop after a committed task and write a HAND-OFF section in your ledger: the seams, the gotchas and the tasks still to do. A fresh agent continues from it and finishes the lane. A plan has as many agents in sequence as it needs.
 
 ## Return contract
 
