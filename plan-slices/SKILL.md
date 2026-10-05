@@ -16,18 +16,22 @@ Plan progress:
 - [ ] 4. Plan defaults checked against the user's decisions
 - [ ] 5. Design review (risky plans and server lanes touching multi-writer state)
 - [ ] 6. Revision by a fresh agent (if reviewed)
-- [ ] 7. Plan committed; cost logged (total under 800k tokens)
+- [ ] 7. Plan committed; cost logged (light 100k–250k, big 250k–500k)
 ```
 
 Contents: Steps · Done when
 
-A plan should cost a small fraction of what its build costs. **Budget: a plan never costs more than 800k tokens in total**, counting the scout, the plan writer, the design review and the revision; a light plan usually lands at 150–350k. Measured on this workflow: light plans cost 150–320k tokens, while one detailed plan once cost 3M because its questions were asked after it was written (the failure this budget prevents).
+A plan should cost a small fraction of what its build costs. **Budgets, counting every planning agent (scout, writer, design review, revision):**
+- **Light plan: 100k–250k tokens.** Scout about 40k, writer about 120k, revision about 60k; most light plans need no design review.
+- **Big plan: 250k–500k tokens.** For risky plans (concurrency, money, multi-user writes, protocols): scout about 60k, writer about 200k, design review about 120k, revision about 100k.
+
+The light plan fixes the scope, the user's decisions, the contracts between components and the tests each task needs. The implementer designs everything else.
 
 Keep to the budget:
-- Give each agent its share in the prompt: scout about 100k, plan writer about 250k, design reviewer about 150k, reviser about 150k. An agent that reaches its share stops and returns what it has.
-- Ask the questions before the plan is written, never after, so no answer forces a rewrite.
-- Revise once. A second revision, or a plan heading past 800k, means the slice is too big: split it into two plans instead of rewriting.
-- Log every planning agent's tokens in `.agent-work/workflow-metrics.md` and check the running total before each dispatch. The **light plan** fixes the scope, the user's decisions, the contracts between components and the tests each task needs. The implementer designs everything else.
+- Give each agent its share in the prompt. An agent that reaches its share stops and returns what it has.
+- Ask the questions before the plan is written, so no answer forces a rewrite.
+- Revise once. A plan that needs a second revision, or heads past 500k, is too big a slice: split it into two plans.
+- Log every planning agent's tokens in `.agent-work/workflow-metrics.md` and check the running total before each dispatch.
 
 ## Steps
 

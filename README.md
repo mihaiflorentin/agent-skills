@@ -126,7 +126,7 @@ Nothing runs below Sonnet 5.5. Sonnet 5.5 medium is the default for code includi
 
 | Rule | The failure behind it |
 |---|---|
-| Ask questions before writing a plan; a plan costs at most 800k tokens. | Answers that arrived after the plan was written forced two full rewrites, about 3M tokens. |
+| Ask questions before writing a plan; a light plan costs 100k–250k tokens, a big one 250k–500k. | An answer that arrives after the plan is written forces a rewrite. |
 | Tag spec features by provenance. | Daily quests reached a plan that the user had never discussed. |
 | Hand off at about 500k tokens or 6 tasks (450k for a lane). | One agent carrying 12 tasks grew to 950k tokens and 5.5 h. |
 | Never wait with `tail -f \| grep`, sleep or `pgrep`. | One wait hung for 56 minutes after its test run had finished, another for 5 h. |

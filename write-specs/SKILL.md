@@ -57,4 +57,4 @@ Keep worked numbers in tables. Leave out code.
 ## Why the flow looks like this
 
 - Provenance tags exist because an earlier spec mixed proposals in with decisions, and the user had to ask where features came from.
-- Ask the questions before drafting. Answers that arrive after a draft forced two full rewrites once, at about 3M tokens.
+- Ask the questions before drafting, so no answer forces a rewrite.
