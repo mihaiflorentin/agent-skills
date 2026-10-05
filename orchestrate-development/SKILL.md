@@ -47,6 +47,7 @@ Record tokens, tool calls and wall clock for every agent in `.agent-work/workflo
 ## Standing rules
 
 - **One plan builds at a time per checkout.** Never run a server plan and a UI plan together. Lanes of one plan are the exception: they run in their own worktrees, and run only fast tests (under a minute each), so load stays low. Run at most 4–5 lanes at a time. The slow gates run once, in the tester.
+- **Wait for every lane before the merge and the review.** Never merge or review a partial batch: one merge of all the lanes, then one reviewer over all the changes, so the fixers can be split by area.
 - **Rulings, not stalls.** When the user is away, decide, log the ruling in `docs/decisions.md` as the controller's, and continue. When the user is present, read `docs/terminology.md` first, then ask genuine product questions one at a time, each with a **Background** paragraph that explains every project term in plain words (what the feature is, what exists, what's missing and why), then 2–4 options that say what the user would see and what each costs, recommended first. Record the answer verbatim. Terse questions leave the user unable to decide.
 - **Fresh agents for revisions.** Give a fix or a plan revision to a new agent along with a findings file. Resuming a long-running agent drags its whole context along.
 - **Short replies to the user.** One short status line per notification. Batch updates.
