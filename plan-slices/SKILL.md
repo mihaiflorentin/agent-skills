@@ -16,22 +16,22 @@ Plan progress:
 - [ ] 4. Plan defaults checked against the user's decisions
 - [ ] 5. Design review (risky plans and server lanes touching multi-writer state)
 - [ ] 6. Revision by a fresh agent (if reviewed)
-- [ ] 7. Plan committed; cost logged (light 100k–250k, big 250k–500k)
+- [ ] 7. Plan committed; cost logged (light about 100k–250k, big about 250k–500k)
 ```
 
 Contents: Steps · Done when
 
-A plan should cost a small fraction of what its build costs. **Budgets, counting every planning agent (scout, writer, design review, revision):**
-- **Light plan: 100k–250k tokens.** Scout about 40k, writer about 120k, revision about 60k; most light plans need no design review.
-- **Big plan: 250k–500k tokens.** For risky plans (concurrency, money, multi-user writes, protocols): scout about 60k, writer about 200k, design review about 120k, revision about 100k.
+A plan should cost a small fraction of what its build costs. Sizes that work well, counting every planning agent (scout, writer, design review, revision):
+- **Light plan: about 100k–250k tokens.** Scout around 40k, writer around 120k, revision around 60k; most light plans need no design review.
+- **Big plan: about 250k–500k tokens.** For risky plans (concurrency, money, multi-user writes, protocols): scout around 60k, writer around 200k, design review around 120k, revision around 100k.
 
 The light plan fixes the scope, the user's decisions, the contracts between components and the tests each task needs. The implementer designs everything else.
 
-Keep to the budget:
-- Give each agent its share in the prompt. An agent that reaches its share stops and returns what it has.
+What keeps a plan near those sizes:
+- Mention the expected size in each planning agent's prompt, so it scopes its reading to match.
 - Ask the questions before the plan is written, so no answer forces a rewrite.
-- Revise once. A plan that needs a second revision, or heads past 500k, is too big a slice: split it into two plans.
-- Log every planning agent's tokens in `.agent-work/workflow-metrics.md` and check the running total before each dispatch.
+- One revision is usually enough. A plan that needs a second one, or grows well past 500k, is usually two slices: split it.
+- Log every planning agent's tokens in `.agent-work/workflow-metrics.md`, to compare against these sizes.
 
 ## Steps
 
