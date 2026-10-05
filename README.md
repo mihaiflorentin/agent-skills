@@ -21,7 +21,7 @@ Claude Code skills for building software with subagents. You make the product de
 |---|---|---|---|
 | 0 | `/orchestrate-development` | At the start of every session and after a `/compact` | The controller loop: resume from the state files, pick the next plan, run stages 2–5, record tokens and quota |
 | 1 | `/write-specs` | Once per new area of the product, before any plan touches it | An approved spec in which every feature is marked `[USER]`, `[PROPOSED]` or `[DEFAULT]` |
-| 2 | `/plan-slices` | Once per roadmap slice (a "plan") | A committed light plan, 150–300 lines, quoting your decisions verbatim, with a wave table, lanes and a file ownership table |
+| 2 | `/plan-slices` | Once per roadmap slice (a "plan") | A committed light plan quoting your decisions verbatim, with a wave table, lanes and a file ownership table |
 | 3 | `/implement-plans` | Right after the plan is committed | Parallel lanes of 3–5 same-area tasks (one worktree each), all merged once with fast checks green; two sequential halves when tasks all depend on each other |
 | 4 | `/test-changes` | Reference, used during stage 3 and before merges | The test cadence, the single tester that runs the full gate and browser suite, how to wait on long runs, flaky-test triage, screenshot review |
 | 5 | `/review-changes` | Right after the build's gate is green | One review over the whole batch (cross-lane seams first), fixed by 1–3 fixers split by area, open items logged |
@@ -134,7 +134,7 @@ Nothing runs below Sonnet 5.5. Sonnet 5.5 medium is the default for code includi
 | Name one owner lane for every shared file. | Parallel lanes cannot see each other; shared budgets, docs, wire types and goldens are where they collide. |
 | Review all lanes with one reviewer, seams first. | The Important findings of the lane trial were disagreements on wire names, shared stores, call chains and flags. |
 | Design-review server lanes that write shared state before the build. | The review found 4 serious bugs before any code existed. |
-| A lane stops at its budget and leaves owed work for the fixers. | Lanes that squeezed in the last tasks shipped broken ones; the fixers write the skipped tests. |
+| A lane leaves what it could not finish well as owed work for the fixers. | Lanes that squeezed in the last tasks shipped broken ones; the fixers write the skipped tests. |
 | Wait for every lane, then review once over everything. | A review of a partial batch missed the seams between lanes and had to be repeated. |
 | The reviewer checks new tests against the server contract. | A wrong unit test pinned a wrong command. |
 | One tester runs the slow gates and loops with the fixers. Rerun a failure alone before treating it as real. | Under heavy parallel load, load-sensitive specs failed that passed alone. |

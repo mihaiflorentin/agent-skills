@@ -37,7 +37,7 @@ Every tool call re-reads your whole context, so cost is calls times context size
 - Batch independent reads in one message. Chain shell steps in one command.
 - Never re-read a file to check an edit you just made.
 - Never wait with `sleep`, `tail -f` or `pgrep` loops. Run long commands in the background and wait for the notice, or make one blocking call.
-- Stop at your budget. Work you did not reach is owed work: list it in the ledger, do not squeeze it in.
+- Work you could not finish well is owed work: list it in the ledger rather than squeezing it in.
 
 ## Commits
 
@@ -57,7 +57,7 @@ Keep `.agent-work/plans-run/<plan>/lane-<x>.md`, one line per task with its comm
 
 ## Hand-off
 
-At about 450k tokens, or at your budget, stop after a committed task and write a HAND-OFF section in your ledger: the seams, the gotchas and the work still owed. A fresh agent continues from it.
+When your context gets long (around 450k tokens), stop after a committed task and write a HAND-OFF section in your ledger: the seams, the gotchas and the work still owed. A fresh agent continues from it.
 
 ## Return contract
 

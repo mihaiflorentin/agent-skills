@@ -1,6 +1,6 @@
 ---
 name: plan-slices
-description: Turns one roadmap slice into a light implementation plan (150-300 lines, no code): question scout, user decisions quoted verbatim, contracts and tests per task, a wave table with lanes and a file ownership table for parallel builds, and a design review for risky plans. Use when the next roadmap item needs a plan, or a plan must be split or revised.
+description: Turns one roadmap slice into a light implementation plan (no code): question scout, user decisions quoted verbatim, contracts and tests per task, a wave table with lanes and a file ownership table for parallel builds, and a design review for risky plans. Use when the next roadmap item needs a plan, or a plan must be split or revised.
 disable-model-invocation: true
 ---
 
@@ -59,16 +59,16 @@ What keeps a plan near those sizes:
    - Scope and deferrals (including what was cut).
    - User decisions, quoted verbatim.
    - Contracts per task, named in the project's own layering: the new interfaces, data types, packages or modules, adapters, wiring, routes or commands and config. For a hexagonal project, list them by folder as the `apply-hexagonal-architecture` skill describes. Also units and lock order, new tables, events and jobs, wire and read changes, statement or performance budgets for new units.
-   - Tasks: 8–12, each naming its required tests, including multi-replica races for anything several actors write.
+   - Tasks: as many as the feature needs (there is no cap on the count), each naming its required tests, including multi-replica races for anything several actors write.
    - **Wave table:** the tasks grouped into waves. Tasks in one wave are independent of each other. When lanes share types, wave 0 is a tiny "seams and types only" task that defines them.
-   - **Lanes:** at most 4–5 implementer lanes per wave, 3–5 tasks each, grouped by area (the same files or subsystem) so each agent loads little context. A plan whose tasks all depend on each other has one task per wave; `/implement-plans` then builds it in sequential halves.
+   - **Lanes:** the tasks cut into lanes of about 3–5 tasks each (the usual size of one implementer's share), grouped by area (the same files or subsystem) so each agent loads little context. Write each lane as its own section, so every implementer is handed its own plan: its tasks, contracts, files and tests, readable without the other lanes. A big feature simply has more lanes or more waves; run 4–5 lanes at a time. A plan whose tasks all depend on each other has one task per wave; `/implement-plans` then builds it in sequential halves.
    - **File ownership table:** one owner lane for every shared file or resource: size budgets, docs, shared contracts and wire types, generated goldens, statement and performance pins, i18n and name tables, feature flags. Non-owners write "Notes for the merge" in their ledger instead of editing. A shared file with no owner is a plan defect.
    - Gates.
    - Hand-off notes.
    - New terms: the plan writer adds each new name (component, status, wire field, user-visible word) to `docs/terminology.md`.
    - Decisions to confirm, each with a default.
 
-   No code, no SQL, 150–300 lines. If the `unslop` skill is installed, the plan writer passes its draft through it once before finishing (one load, not one per section); say so in the writer's prompt, so the skill loads in its context and not yours. The plan writer reads seams through LSP, grep and `go doc`, never whole files. If another agent is committing in the same checkout, it writes the file without committing, and you commit it with `shared/scripts/commit-only.sh`.
+   No code, no SQL; as long as the feature needs. If the `unslop` skill is installed, the plan writer passes its draft through it once before finishing (one load, not one per section); say so in the writer's prompt, so the skill loads in its context and not yours. The plan writer reads seams through LSP, grep and `go doc`, never whole files. If another agent is committing in the same checkout, it writes the file without committing, and you commit it with `shared/scripts/commit-only.sh`.
 4. **Check against the decisions.** Read the plan's "decisions to confirm". Reject any default that contradicts a binding user decision. One plan once changed "opens automatically" into "a user opens it".
 5. **Design review**, for risky plans: concurrency, money or rewards, concurrent multi-user writes, protocols. Server lanes that touch multi-writer state always get one before the build: on a trial it found 4 serious bugs before any code existed. Dispatch one `reviewer`. It returns at most 40 lines covering findings by severity (with plan line, problem and fix) and a verdict on each decision. Skip this for plans where each user's data is private.
 6. **Revise.** Write the rulings file: the findings plus your decisions. Hand it to a **fresh** `implementer`, which folds each fix into the contract or task it belongs to.
