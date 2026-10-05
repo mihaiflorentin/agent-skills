@@ -35,10 +35,19 @@ You are the **controller**. Subagents write specs, plans and code, and run tests
 ## Loop per plan
 
 1. Read the project files (`shared/project-files.md`). Resume from `.agent-work/STATE.md` and `git log`. On a new project, run `shared/scripts/init-project.sh` first (the committed `docs/` layout plus the git-ignored `.agent-work/`), then time the full gate once and record the test profile, Fast or Slow, in `.agent-work/STATE.md` (`/test-changes`). Every dispatch carries that profile's cadence.
-2. Run `/plan-slices`, then `/implement-plans` (parallel lanes by default), then `/review-changes`, then the tester loop of `/test-changes`.
-3. Nothing reaches the main branch lane by lane. When the tester's gate is green, merge to the main (integration) branch, run the full pre-merge gate and push. A single urgent user-reported bug may go alone, but still gets the review. Bug-fix batches and follow-up sweeps use this same flow. Regenerate generated files instead of hand-resolving their conflicts.
-4. Update and commit `docs/decisions.md`, `docs/roadmap.md` and `docs/terminology.md`, then update `.agent-work/STATE.md` and `.agent-work/workflow-metrics.md`. Suggest `/compact` to the user.
-5. Pick the next plan. Ask the user whether reordering would let them test earlier: you can only run the product in tests, and the user is the first person to try it.
+2. **Plan** (`/plan-slices`): a scout lists the open questions, you ask the user and record the answers verbatim, then a light plan with a wave table, lanes and a file ownership table. Risky plans get one design review first.
+3. **Build** (`/implement-plans`), the whole workflow in order:
+   1. **Lanes.** A few Sonnet 5.5 agents (medium effort by default, high only for really difficult work; Opus 5.5 only for visual art), at most 4–5 at a time, each in its own worktree and branch. A lane holds 3–5 tasks grouped by area (the same files or subsystem), so it loads as little context as possible, and edits only the files it owns.
+   2. **Fast tests only in a lane:** targeted unit tests, type, vet and format checks, each under about a minute. Never the full gate, e2e or database suites; the lane lists them as owed to the tester.
+   3. **Wait for every lane.** Never merge or review a partial batch.
+   4. **One merge** of all the lanes into one integration branch, by one merge agent: notes for the merge applied, generated files regenerated, fast checks green, one combined owed-to-tester list.
+   5. **One review** (`/review-changes`) of all the changes at once, cross-lane seams first.
+   6. **1–3 fixers**, split by where the findings are: findings in the same files or subsystem go to the same fixer, so it loads that context once. Fixers also write the owed tests of their area. Important findings get a scoped re-review.
+   7. **One tester** (`/test-changes`) runs the full gate and the e2e suite. Real failures go back to the fixer of that area; repeat until green.
+   8. **Only then** merge the integration branch into the main branch with the pre-merge gate, and push.
+4. Nothing reaches the main branch lane by lane. A single urgent user-reported bug may go alone, but still gets the review. Bug-fix batches and follow-up sweeps use this same workflow. Regenerate generated files instead of hand-resolving their conflicts.
+5. Update and commit `docs/decisions.md`, `docs/roadmap.md` and `docs/terminology.md`, then update `.agent-work/STATE.md` and `.agent-work/workflow-metrics.md`. Suggest `/compact` to the user.
+6. Pick the next plan. Ask the user whether reordering would let them test earlier: you can only run the product in tests, and the user is the first person to try it.
 
 ## Measure
 
