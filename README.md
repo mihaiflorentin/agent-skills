@@ -22,9 +22,9 @@ Claude Code skills for building software with subagents. You make the product de
 | 0 | `/orchestrating-development` | At the start of every session and after a `/compact` | The controller loop: resume from the state files, pick the next plan, run stages 2–5, record tokens and quota |
 | 1 | `/writing-specs` | Once per new area of the product, before any plan touches it | An approved spec in which every feature is marked `[USER]`, `[PROPOSED]` or `[DEFAULT]` |
 | 2 | `/planning-slices` | Once per roadmap slice (a "plan") | A committed light plan, 150–300 lines, quoting your decisions verbatim, with a wave table, lanes and a file ownership table |
-| 3 | `/implementing-plans` | Right after the plan is committed | Parallel lanes (one worktree each) merged with fast checks green; two sequential halves when tasks all depend on each other |
-| 4 | `/testing-changes` | Reference, used during stage 3 and before merges | The test cadence, the single tester that runs the slow gates, how to wait on long runs, flaky-test triage, screenshot review |
-| 5 | `/reviewing-plans` | Right after the build's gate is green | One reviewer's findings (cross-lane seams first) fixed by one fixer, open items logged |
+| 3 | `/implementing-plans` | Right after the plan is committed | Parallel lanes of 3–5 same-area tasks (one worktree each), all merged once with fast checks green; two sequential halves when tasks all depend on each other |
+| 4 | `/testing-changes` | Reference, used during stage 3 and before merges | The test cadence, the single tester that runs the full gate and browser suite, how to wait on long runs, flaky-test triage, screenshot review |
+| 5 | `/reviewing-plans` | Right after the build's gate is green | One review over the whole batch (cross-lane seams first), fixed by 1–3 fixers split by area, open items logged |
 | – | `/unslop` | Whenever prose is written for people | Specs, plans, docs and messages without AI writing patterns |
 | – | `/applying-hexagonal-architecture` | Only in projects on the hexagonal layout | The layout, service-container rules and layer check the other skills apply there |
 
@@ -35,15 +35,15 @@ Then merge, update the state files, `/compact`, and start the next plan at stage
       │
       ▼
 ┌─► /planning-slices ──► /implementing-plans ──► /reviewing-plans ──► merge + /compact ─┐
-│            (lanes in waves; then one reviewer, one fixer, one tester)                 │
+│            (lanes in batches; then one merge, one review, 1-3 fixers, one tester)     │
 └─────────────────────────────────── next plan ───────────────────────────────────────┘
 ```
 
 ## What each one asks of you
 
 - **`/writing-specs`.** You answer product questions in batches of up to 4. You then go through every agent-proposed feature and choose keep or cut. Last, you approve the written spec.
-- **`/planning-slices`.** You answer up to about 8 questions per plan, mostly keep/cut on proposed features plus the gameplay choices the spec leaves open. Engineering questions are decided for you and logged.
-- **`/implementing-plans`.** Nothing, unless an agent reports a concern that needs a product decision. For UI and art work, you approve the renders and screenshots before they are committed. The controller also asks for your weekly quota percentage at the build's start, after it and when the gate is green.
+- **`/planning-slices`.** You answer up to about 8 questions per plan, mostly keep/cut on proposed features plus the product choices the spec leaves open. Engineering questions are decided for you and logged.
+- **`/implementing-plans`.** Nothing, unless an agent reports a concern that needs a product decision. For UI and visual art work, you approve the renders and screenshots before they are committed. The controller also asks for your weekly quota percentage at the build's start, after it and when the gate is green.
 - **`/testing-changes`.** Nothing. It is the agents' and the controller's reference.
 - **`/reviewing-plans`.** Sometimes one question, when a finding turns out to be a product choice (for example "10% of max or of missing?").
 
@@ -53,7 +53,7 @@ When you are away, the controller decides with a recommended default, logs it in
 
 1. Run `/orchestrating-development`. The controller reads `.agent-work/STATE.md`, says where things stand, and starts the next plan.
 2. Answer the plan's questions when they appear.
-3. Wait. The controller replies with one short line per agent notification. A plan takes a few hours of wall clock: the build as parallel lanes in waves (about 70 minutes for 20 tasks), then one review, one fix pass and one test loop.
+3. Wait. The controller replies with one short line per agent notification. A plan takes a few hours of wall clock: the build as parallel lanes (3–5 same-area tasks each, at most 4–5 lanes at a time, fast tests only; about 70 minutes for 20 tasks), then, once every lane is done, one merge, one review, 1–3 fixers and one test loop. Only a green result reaches the main branch, and nothing arrives lane by lane.
 4. When a plan merges, the controller suggests `/compact`. Run it, because the controller's context is re-read on every notification.
 5. Repeat.
 
@@ -110,17 +110,17 @@ The skills are user-invoked (`disable-model-invocation: true`), so they cost no 
 Assumed agent types in `~/.claude/agents`:
 - `scout`: cheap lookups.
 - `implementer`: Sonnet 5.5 medium, the default.
-- `implementer-high`: Sonnet 5.5 high, for hard UI work or concurrency.
+- `implementer-high`: Sonnet 5.5 high, only for really difficult tasks.
 - `reviewer`: read-only.
 - `engineer` and `architect`: Opus, for escalation.
 
-Nothing runs below Sonnet 5.5. Opus is for graphical assets, audio, and work a Sonnet attempt already failed.
+Nothing runs below Sonnet 5.5. Sonnet 5.5 medium is the default for code including UI, and audio and music generation also runs on Sonnet 5.5. Opus 5.5 is only for visual art (3D models, icons, portraits, VFX) and for escalation after a Sonnet attempt failed.
 
 ## Test profiles
 
 `/testing-changes` has two cadences. Time the full gate once per project and record the profile in `.agent-work/STATE.md`:
 - **Fast** (gate up to about 3 minutes, e2e up to about 5): test first, full gate before every commit. This is the usual recommended practice.
-- **Slow** (longer gates, shared databases or browsers): targeted checks per commit, one full gate per plan. This is the token-optimised cadence built on a game project, where a full gate plus e2e took 1–2 hours.
+- **Slow** (longer gates, shared databases or browsers): targeted checks per commit, one full gate per plan. This is the token-optimised cadence built on one project, where a full gate plus e2e took 1–2 hours.
 
 ## Rules of thumb that came from real failures
 
@@ -130,14 +130,15 @@ Nothing runs below Sonnet 5.5. Opus is for graphical assets, audio, and work a S
 | Tag spec features by provenance. | Daily quests reached a plan that the user had never discussed. |
 | Hand off at about 500k tokens or 6 tasks (450k for a lane). | One agent carrying 12 tasks grew to 950k tokens and 5.5 h. |
 | Never wait with `tail -f \| grep`, sleep or `pgrep`. | One wait hung for 56 minutes after its test run had finished, another for 5 h. |
-| Never run a server plan and a UI plan at the same time. | The machine load made perf tests flake, and the reruns cost more than the parallelism saved. Lanes of one plan avoid it by running only unit tests under a minute. |
+| Never run a server plan and a UI plan at the same time. | The machine load made perf tests flake, and the reruns cost more than the parallelism saved. Lanes of one plan avoid it by running only fast tests under a minute. |
 | Name one owner lane for every shared file. | Parallel lanes cannot see each other; shared budgets, docs, wire types and goldens are where they collide. |
 | Review all lanes with one reviewer, seams first. | The Important findings of the lane trial were disagreements on wire names, shared stores, call chains and flags. |
 | Design-review server lanes that write shared state before the build. | The review found 4 serious bugs before any code existed. |
-| A lane stops at its budget and leaves owed work for the fixer. | Lanes that squeezed in the last tasks shipped broken ones; the fixer writes the skipped tests. |
+| A lane stops at its budget and leaves owed work for the fixers. | Lanes that squeezed in the last tasks shipped broken ones; the fixers write the skipped tests. |
+| Wait for every lane, then review once over everything. | A review of a partial batch missed the seams between lanes and had to be repeated. |
 | The reviewer checks new tests against the server contract. | A wrong unit test pinned a wrong command. |
-| One tester runs the slow gates and loops with the fixer. Rerun a failure alone before treating it as real. | Under heavy parallel load, load-sensitive specs failed that passed alone. |
-| Check the plan's open decisions against the user's answers. | A plan turned "opens automatically" into "a player opens it". |
+| One tester runs the slow gates and loops with the fixers. Rerun a failure alone before treating it as real. | Under heavy parallel load, load-sensitive specs failed that passed alone. |
+| Check the plan's open decisions against the user's answers. | A plan turned "opens automatically" into "a user opens it". |
 | Make every commit build. | Two commits at medium effort didn't build, or cut a function short. |
 | Keep the review, scoped. | It found 1–5 real Important bugs per plan whatever the plan style was. |
 
@@ -150,7 +151,7 @@ On one 20-task plan, after a trial the user judged "a huge improvement":
 | Sequential halves | 158–189k | 29–40 min |
 | Parallel lanes (4 lanes, waves) | about 98k | about 3.5 min |
 
-The 20 tasks took about 70 minutes and about 2% of a weekly quota. Review, fix and test costs are added afterwards. Art lanes run on Opus and are reported separately. The controller records these numbers per plan in `.agent-work/workflow-metrics.md`.
+The 20 tasks took about 70 minutes and about 2% of a weekly quota. Bug-fix batches of 3 lanes × 4 tasks took about 4–6 minutes per lane on Sonnet medium. Review, fix and test costs are added afterwards. Visual art lanes run on Opus and are reported separately. The controller records these numbers per plan in `.agent-work/workflow-metrics.md`.
 
 ## Authoring notes
 

@@ -47,7 +47,7 @@ If the project already keeps specs and plans somewhere else, use that location a
 
 ## docs/terminology.md
 
-This is the project's glossary: every business term (game, product or domain words, such as "operation", "H-hour" or "invoice run") and every technical term a newcomer would trip over (a wire field, an internal component, a cadence name). It has two uses. Agents keep names consistent with it, and the controller uses it when it explains a question to the user in plain words.
+This is the project's glossary: every business term (product or domain words, such as "invoice run" or "billing run") and every technical term a newcomer would trip over (a wire field, an internal component, a cadence name). It has two uses. Agents keep names consistent with it, and the controller uses it when it explains a question to the user in plain words.
 
 Format: a short contents list, then two alphabetical tables.
 
@@ -55,7 +55,7 @@ Format: a short contents list, then two alphabetical tables.
 ## Business terms
 | Term | Meaning in plain words | Where it lives |
 |---|---|---|
-| H-hour | The moment every fleet of an operation launches together, so they arrive as one wave. | domain/operations, docs/specs/…-operations.md |
+| Billing run | The nightly job that charges every subscription due that day. | billing/, docs/specs/…-billing.md |
 
 ## Technical terms
 | Term | Meaning in plain words | Where it lives |
@@ -67,7 +67,7 @@ Who maintains it:
 - **Spec writer:** adds every new term the spec introduces, before the user reads the spec.
 - **Plan writer:** adds the terms the plan introduces (new components, wire fields, statuses).
 - **Implementer:** adds a term in the same commit that introduces the name in code or UI, and updates its line when a rename lands.
-- **Reviewer:** reports a new player-visible or cross-module name that is missing from the file, as a Minor finding.
+- **Reviewer:** reports a new user-visible or cross-module name that is missing from the file, as a Minor finding.
 - **Controller:** reads it before asking the user a question, and explains every term the question uses.
 
 Keep each meaning to one line. One term has one name. When two words mean the same thing, pick one and list the other as "see X".

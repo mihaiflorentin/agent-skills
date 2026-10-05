@@ -36,7 +36,7 @@ This is the recommended practice for most projects.
 
 ## Cadence: Slow profile
 
-This is token-optimised for long gates, as used on a game project, where `make check` plus e2e took 1–2 hours. Running the gate once per plan instead of once per task saved most of the waiting and the reruns, and caught no fewer bugs.
+This is token-optimised for long gates, as used on one project, where `make check` plus e2e took 1–2 hours. Running the gate once per plan instead of once per task saved most of the waiting and the reruns, and caught no fewer bugs.
 
 | When | Run |
 |---|---|
@@ -48,11 +48,11 @@ This is token-optimised for long gates, as used on a game project, where `make c
 
 ## The tester (parallel lanes)
 
-When a plan was built as parallel lanes, lanes run only unit tests under a minute each, so the slow gates move to one place: ONE tester agent, after the merge, review and fix.
+When a plan was built as parallel lanes, lanes run only fast tests (under a minute each), so the slow gates move to one place: ONE tester agent, after the merge, the one review and the fixers.
 - It reads the combined owed-to-tester list and runs the full gate and the full browser suite (the Slow profile's end-of-plan run), in the background with `run-logged.sh`.
 - Specs that advance shared clocks or other global state run last, or on a fresh server.
 - On a failure it reruns that test alone before treating it as real. Under heavy parallel load, load-sensitive tests flake; a pass alone is a flake, to be fixed at the root.
-- A real failure goes to the fixer (`/reviewing-plans`) with the log path. The tester and the fixer loop until the gate is green.
+- A real failure goes back to the fixer that owns that area (`/reviewing-plans`) with the log path. The tester and the fixers loop until green. Only then does the work merge to the main branch and get pushed. Nothing reaches it lane by lane.
 
 ## Long runs
 

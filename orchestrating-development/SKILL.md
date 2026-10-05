@@ -12,9 +12,9 @@ Copy this checklist into your notes and tick it off per plan:
 Plan progress:
 - [ ] 1. Read the project files; resume from STATE.md and git log; test profile known; layout set up
 - [ ] 2. /planning-slices: questions asked, plan committed
-- [ ] 3. /implementing-plans: lanes merged (or both halves done); quota % asked at build start and after the build
-- [ ] 4. /reviewing-plans: one reviewer, one fixer; /testing-changes: one tester, gate green; quota % asked
-- [ ] 5. Merge with the pre-merge gate
+- [ ] 3. /implementing-plans: EVERY lane of the batch finished, then one merge (or both halves done); quota % asked at build start and after the build
+- [ ] 4. /reviewing-plans: one review over all changes, 1-3 fixers; /testing-changes: one tester, gate green; quota % asked
+- [ ] 5. Only now merge to the main branch with the pre-merge gate, and push
 - [ ] 6. docs/ (decisions, roadmap, terminology) committed; STATE.md and metrics updated; /compact suggested
 ```
 
@@ -28,17 +28,17 @@ You are the **controller**. Subagents write specs, plans and code, and run tests
 |---|---|---|
 | Design a new area | `/writing-specs` | the user approved the spec, with every feature marked as their decision or a proposal they kept |
 | Plan one slice | `/planning-slices` | a committed light plan with binding user decisions quoted verbatim |
-| Build it | `/implementing-plans` | every lane merged (parallel lanes, the default) or every task committed (sequential halves), fast checks green |
-| Check it | `/reviewing-plans` | one reviewer over all lanes, one fixer, rulings applied |
-| Gate and waits | `/testing-changes` | one tester ran the slow gates and looped with the fixer until green; also the reference for cadence, background runs, flakes and screenshot baselines |
+| Build it | `/implementing-plans` | every lane of the batch finished and merged once (parallel lanes, the default) or every task committed (sequential halves), fast checks green |
+| Check it | `/reviewing-plans` | one reviewer over all changes, 1–3 fixers split by area, rulings applied |
+| Gate and waits | `/testing-changes` | one tester ran the slow gates and looped with the fixers until green; also the reference for cadence, background runs, flakes and screenshot baselines |
 
 ## Loop per plan
 
 1. Read the project files (`shared/project-files.md`). Resume from `.agent-work/STATE.md` and `git log`. On a new project, run `shared/scripts/init-project.sh` first (the committed `docs/` layout plus the git-ignored `.agent-work/`), then time the full gate once and record the test profile, Fast or Slow, in `.agent-work/STATE.md` (`/testing-changes`). Every dispatch carries that profile's cadence.
 2. Run `/planning-slices`, then `/implementing-plans` (parallel lanes by default), then `/reviewing-plans`, then the tester loop of `/testing-changes`.
-3. Merge at plan boundaries, running the full pre-merge gate. Regenerate generated files instead of hand-resolving their conflicts.
+3. Nothing reaches the main branch lane by lane. When the tester's gate is green, merge to the main (integration) branch, run the full pre-merge gate and push. A single urgent user-reported bug may go alone, but still gets the review. Bug-fix batches and follow-up sweeps use this same flow. Regenerate generated files instead of hand-resolving their conflicts.
 4. Update and commit `docs/decisions.md`, `docs/roadmap.md` and `docs/terminology.md`, then update `.agent-work/STATE.md` and `.agent-work/workflow-metrics.md`. Suggest `/compact` to the user.
-5. Pick the next plan. Ask the user whether reordering would let them test earlier: you can only run the game in tests, and the user is the first player.
+5. Pick the next plan. Ask the user whether reordering would let them test earlier: you can only run the product in tests, and the user is the first person to try it.
 
 ## Measure
 
@@ -46,8 +46,8 @@ Record tokens, tool calls and wall clock for every agent in `.agent-work/workflo
 
 ## Standing rules
 
-- **One plan builds at a time per checkout.** Never run a server plan and a UI plan together. Lanes of one plan are the exception: they run in their own worktrees, and run only unit tests under a minute, so load stays low. The slow gates run once, in the tester.
-- **Rulings, not stalls.** When the user is away, decide, log the ruling in `docs/decisions.md` as the controller's, and continue. When the user is present, read `docs/terminology.md` first, then ask genuine product questions one at a time, each with a **Background** paragraph that explains every project term in plain words (what the feature is, what exists, what's missing and why), then 2–4 options that say what the player would see and what each costs, recommended first. Record the answer verbatim. Terse questions leave the user unable to decide.
+- **One plan builds at a time per checkout.** Never run a server plan and a UI plan together. Lanes of one plan are the exception: they run in their own worktrees, and run only fast tests (under a minute each), so load stays low. Run at most 4–5 lanes at a time. The slow gates run once, in the tester.
+- **Rulings, not stalls.** When the user is away, decide, log the ruling in `docs/decisions.md` as the controller's, and continue. When the user is present, read `docs/terminology.md` first, then ask genuine product questions one at a time, each with a **Background** paragraph that explains every project term in plain words (what the feature is, what exists, what's missing and why), then 2–4 options that say what the user would see and what each costs, recommended first. Record the answer verbatim. Terse questions leave the user unable to decide.
 - **Fresh agents for revisions.** Give a fix or a plan revision to a new agent along with a findings file. Resuming a long-running agent drags its whole context along.
 - **Short replies to the user.** One short status line per notification. Batch updates.
 - **Architecture.** Follow the project's own conventions. For a project on the hexagonal layout (`cmd/`, `config/`, `container/`, `domain/`, `infrastructure/`, `port/`), every stage also applies `/applying-hexagonal-architecture`.

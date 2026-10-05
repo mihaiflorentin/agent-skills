@@ -13,10 +13,10 @@ Build progress (parallel lanes, the default):
 - [ ] 1. Plan has a wave table, lanes and a file ownership table; mode chosen
 - [ ] 2. Lane-rules file written in .agent-work/; one worktree and branch per lane
 - [ ] 3. Wave 0 (seams and types) merged, if the plan has one
-- [ ] 4. Each wave: lanes dispatched together, reports read, metrics logged
-- [ ] 5. Merge agent: lanes merged (--no-ff), notes applied, fast checks green, owed-to-tester list written
+- [ ] 4. Each batch: lanes dispatched together; WAIT for every lane; reports read, metrics logged
+- [ ] 5. Merge agent: all lanes merged once (--no-ff), notes applied, fast checks green, owed-to-tester list written
 - [ ] 6. Art lanes: renders approved by the user before commit
-- [ ] 7. Hand over to /reviewing-plans (one reviewer, one fixer, one tester)
+- [ ] 7. Hand over to /reviewing-plans (one review, 1-3 fixers, one tester); main branch only after green
 ```
 
 Sequential fallback checklist:
@@ -32,7 +32,7 @@ Build progress (sequential halves):
 
 Contents: Choose the mode · Parallel lanes · Sequential halves · Watch for
 
-A subagent's context cannot be compacted, and every tool call re-reads all of it, so cost grows with the length of one agent's run. Lanes keep every agent short and run side by side. Measured on one 20-task plan: sequential halves cost 158–189k Sonnet tokens and 29–40 minutes per task; four parallel lanes cost about 98k tokens and 3.5 minutes per task, 20 tasks in about 70 minutes. Review, fix and test costs come on top (see `/reviewing-plans` and `/testing-changes`).
+A subagent's context cannot be compacted, and every tool call re-reads all of it, so cost grows with the length of one agent's run. Lanes keep every agent short and run side by side. Measured on one 20-task plan: sequential halves cost 158–189k Sonnet tokens and 29–40 minutes per task; four parallel lanes cost about 98k tokens and 3.5 minutes per task, 20 tasks in about 70 minutes. Bug-fix batches of 3 lanes × 4 tasks took about 4–6 minutes per lane on Sonnet medium. Review, fix and test costs come on top (see `/reviewing-plans` and `/testing-changes`).
 
 ## Choose the mode
 
@@ -43,14 +43,14 @@ Use **parallel lanes** when the plan has a wave table and a file ownership table
 1. **Lane rules.** Copy `shared/lane-rules.md` to `.agent-work/plans-run/<plan>/lane-rules.md` and fill in the project's test commands, the ownership table location and the docs to read. Every dispatch prompt then stays a few lines: the lane name, its tasks, the plan path and the rules path.
 2. **Worktrees.** For each lane, one worktree and one branch off the current base: `git worktree add -b <plan>/lane-x ../<plan>-lane-x`. Share installed dependencies instead of reinstalling (for example a symlink to `node_modules`). Lane agents never touch another lane's worktree.
 3. **Wave 0.** If lanes share types, a tiny wave-0 task (seams and types only, no behaviour) builds first, is merged into the base, and the lane branches start from it.
-4. **Dispatch each wave.** At most 4 `implementer` agents per wave, 2–3 tasks each, all dispatched in one message. A lane may edit only files it owns (the plan's ownership table). For a file it does not own it writes a line under "Notes for the merge" in its ledger and does not edit. Each prompt carries:
+4. **Dispatch each wave.** At most 4–5 `implementer` agents per wave, all dispatched in one message. A lane holds 3–5 tasks, grouped by area (the same files or subsystem), so the agent loads as little context as possible. The same flow applies to bug-fix batches and follow-up sweeps. A lane may edit only files it owns (the plan's ownership table). For a file it does not own it writes a line under "Notes for the merge" in its ledger and does not edit. Each prompt carries:
    - the lane name, worktree path, task numbers and plan path;
    - the lane-rules path and the binding decisions section;
    - `docs/terminology.md`, and for a hexagonal project the build order of `/applying-hexagonal-architecture`.
-5. **Lane tests.** Lanes run only unit tests that finish in under a minute each. No full gate, no browser suite, no database suite: the tester runs those later. Whatever a lane skips for that reason goes in its ledger under "Owed to the tester". Tests a lane cannot finish within its budget go in the ledger under owed work, and the fixer writes them (`/reviewing-plans`).
+5. **Lane tests.** Lanes run only fast tests, each under a minute. Never the full gate, the browser or e2e suites, or a database suite: the tester runs those later. Whatever a lane skips for that reason goes in its ledger under "Owed to the tester". Tests a lane cannot finish within its budget go in the ledger under owed work, and the fixers write them (`/reviewing-plans`).
 6. **Ledger.** Each lane keeps `.agent-work/plans-run/<plan>/lane-x.md` with one line per task and commit, the sections "Notes for the merge" and "Owed to the tester", and a HAND-OFF section if it stops early. A lane stops at its budget and leaves the rest as owed work; it does not squeeze work in.
-7. **Merge agent.** After each wave (or at the end when waves are small), dispatch one `implementer` that merges every lane branch with `--no-ff`, applies each lane's "Notes for the merge" to the files it owns, resolves conflicts (regenerate generated files rather than hand-merging them), runs the fast checks and writes one combined owed-to-tester list. Later waves branch from the merged base.
-8. **Art and asset lanes.** Graphical or audio lanes run on Opus (`/orchestrating-development` model rules), in parallel with the code lanes. Renders are not committed until the user has approved them at an art checkpoint (`/testing-changes`, screenshot baselines). Report their tokens separately from the code lanes.
+7. **Merge agent.** Wait for EVERY lane of the batch to finish. Never merge or review a partial batch, and review as many tasks at once as possible. Then dispatch one `implementer` that merges every lane branch with `--no-ff`, applies each lane's "Notes for the merge" to the files it owns, resolves conflicts (regenerate generated files rather than hand-merging them), runs the fast checks and writes one combined owed-to-tester list. Later waves branch from the merged base. The merge goes to the integration branch only; the main branch waits for the tester's green gate.
+8. **Art and asset lanes.** Visual art lanes (3D models, icons, portraits, VFX) run on Opus 5.5, in parallel with the code lanes. Audio and music generation runs on Sonnet 5.5 (`shared/agent-rules.md`, Models). Renders are not committed until the user has approved them at an art checkpoint (`/testing-changes`, screenshot baselines). Report their tokens separately from the code lanes.
 9. **Metrics.** Record each agent's tokens, tool calls and wall clock in `.agent-work/workflow-metrics.md`.
 10. **Done when** every lane is merged, the fast checks are green on the merged base, and the combined owed-to-tester list exists. Then run `/reviewing-plans`. The full gate belongs to the tester, not to this stage.
 
@@ -75,7 +75,7 @@ For plans whose tasks all depend on each other. One implementer builds a run of 
 
 ## Watch for
 
-- **Skipped tests.** Implementers skip owed tests under budget pressure. Pass every ledger's "Owed to the tester" and owed-work lists on: the reviewer decides from the code which ones hide real bugs, and the fixer writes them.
+- **Skipped tests.** Implementers skip owed tests under budget pressure. Pass every ledger's "Owed to the tester" and owed-work lists on: the reviewer decides from the code which ones hide real bugs, and the fixers write them.
 - **Seam mismatches.** Parallel lanes cannot see each other. Wire and field names, shared stores, call chains and feature flags are where they disagree. The ownership table and wave 0 reduce this; the review's first focus catches the rest.
 - **Ownership breaches.** A lane that edits a shared file it does not own causes merge conflicts and silent overwrites. The merge agent reports any it finds.
 - **Broken commits.** A commit that doesn't build, or that truncates a function, slipped through twice at medium effort. The "chain the build before committing" rule prevents it.

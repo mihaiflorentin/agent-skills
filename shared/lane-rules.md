@@ -6,6 +6,8 @@ Contents: Read first · Ownership · Tests · Token discipline · Commits · Led
 
 ## Read first
 
+Your lane holds 3–5 tasks of one area (the same files or subsystem), so load only that area's context.
+
 Read only these, in this order, and only the parts that matter to your tasks:
 1. The plan: your tasks, the decisions section (binding), the wave table, the file ownership table.
 2. [the project's AGENTS.md or CLAUDE.md sections for the areas you touch]
@@ -22,8 +24,8 @@ Read only these, in this order, and only the parts that matter to your tasks:
 
 ## Tests
 
-- Run only unit tests that finish in under a minute each: the touched packages or specs, plus the type and format checks.
-- Do not run the full gate, the browser suite, the database or multi-replica suites, or simulations. Record each test you skipped for that reason under "Owed to the tester".
+- Run only fast tests, each under a minute: the touched packages or specs, plus the type and format checks.
+- Never run the full gate, the browser or e2e suites, the database or multi-replica suites, or simulations. Record each test you skipped for that reason under "Owed to the tester".
 - Write the test with the change. A test pins the server contract, so check it against the code or the spec it exercises: a wrong test can pin a wrong command.
 - Run each task's tests once the change is complete, then again only after a fix.
 

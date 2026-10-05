@@ -4,8 +4,8 @@ Paste the relevant blocks into every subagent prompt, with every script path wri
 
 ## Models
 
-- Nothing below Sonnet 5.5. Use `implementer` (Sonnet medium) by default, including ordinary UI work. Use `implementer-high` only for genuinely hard UI/3D work or subtle concurrency. Use `reviewer` for reviews and `scout` for cheap lookups.
-- Use Opus 5.5 only for graphical assets (3D, VFX, art), audio, and work a Sonnet attempt already failed.
+- Nothing below Sonnet 5.5. Use `implementer` (Sonnet 5.5 medium) by default for code, including UI. Use `implementer-high` only for really difficult tasks. Audio and music generation runs on Sonnet 5.5. Use `reviewer` for reviews and `scout` for cheap lookups.
+- Use Opus 5.5 only for visual art (3D models, icons, portraits, VFX) and to escalate work a Sonnet attempt already failed.
 - Never pass `model: "sonnet"`: that alias can resolve to an older model. Use the pinned agent types.
 
 ## Token and tool-call discipline (every agent)
@@ -27,7 +27,7 @@ Every tool call re-reads the agent's whole context, so the cost is about calls Ã
 
 ## Parallel lanes
 
-When a plan builds as lanes, paste `shared/lane-rules.md` (filled in) instead of the gate cadence and hand-off blocks below. Lanes stop at their budget and list unreached work as owed work for the fixer.
+When a plan builds as lanes, paste `shared/lane-rules.md` (filled in) instead of the gate cadence and hand-off blocks below. A lane holds 3â€“5 tasks of one area and runs only fast tests (under a minute each). Lanes stop at their budget and list unreached work as owed work for the fixer. The same flow applies to bug-fix batches and follow-up sweeps.
 
 ## Gate cadence
 
@@ -60,7 +60,7 @@ Paste the block for the project's profile (from `/testing-changes`, recorded in 
 
 ## Scope
 
-- Build only what the plan and the user's decisions name. If a gameplay or product question is genuinely open, take the option closest to the plan, log it as a deviation and continue.
+- Build only what the plan and the user's decisions name. If a product question is genuinely open, take the option closest to the plan, log it as a deviation and continue.
 - Use the names in `docs/terminology.md`. A new business or technical term goes into it in the same commit that introduces it. `docs/` is committed; `.agent-work/` never is.
 - Subagents never dispatch subagents and never retry a refused permission.
 - **Hand-off.** At about 500k tokens, or after 6 tasks, stop after a committed task. Write a HAND-OFF section in the progress file covering the seams, the gotchas and the work still owed. A fresh agent continues from there, because a subagent's context cannot be compacted.
