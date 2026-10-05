@@ -21,7 +21,7 @@ Plan progress:
 
 Contents: Steps · Done when
 
-A plan should cost a small fraction of what its build costs. Sizes that work well, counting every planning agent (scout, writer, design review, revision):
+A plan should cost a small fraction of what its build costs. Typical sizes, counting every planning agent (scout, writer, design review, revision). They are reference points, not limits: a plan may come in under or over them.
 - **Light plan: about 100k–250k tokens.** Scout around 40k, writer around 120k, revision around 60k; most light plans need no design review.
 - **Big plan: about 250k–500k tokens.** For risky plans (concurrency, money, multi-user writes, protocols): scout around 60k, writer around 200k, design review around 120k, revision around 100k.
 
@@ -30,7 +30,7 @@ The light plan fixes the scope, the user's decisions, the contracts between comp
 What keeps a plan near those sizes:
 - Mention the expected size in each planning agent's prompt, so it scopes its reading to match.
 - Ask the questions before the plan is written, so no answer forces a rewrite.
-- One revision is usually enough. A plan that needs a second one, or grows well past 500k, is usually two slices: split it.
+- One revision is usually enough. A plan that needs a second one, or grows far past these sizes, may be two slices: consider splitting it.
 - Log every planning agent's tokens in `.agent-work/workflow-metrics.md`, to compare against these sizes.
 
 ## Steps
