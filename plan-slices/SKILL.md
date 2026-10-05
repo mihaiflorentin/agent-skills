@@ -16,12 +16,18 @@ Plan progress:
 - [ ] 4. Plan defaults checked against the user's decisions
 - [ ] 5. Design review (risky plans and server lanes touching multi-writer state)
 - [ ] 6. Revision by a fresh agent (if reviewed)
-- [ ] 7. Plan committed; cost logged
+- [ ] 7. Plan committed; cost logged (total under 800k tokens)
 ```
 
 Contents: Steps · Done when
 
-A plan should cost a small fraction of what its build costs. Measured on this workflow: light plans cost 150–320k tokens, while one detailed plan cost 3M because its questions were asked after it was written. The **light plan** fixes the scope, the user's decisions, the contracts between components and the tests each task needs. The implementer designs everything else.
+A plan should cost a small fraction of what its build costs. **Budget: a plan never costs more than 800k tokens in total**, counting the scout, the plan writer, the design review and the revision; a light plan usually lands at 150–350k. Measured on this workflow: light plans cost 150–320k tokens, while one detailed plan once cost 3M because its questions were asked after it was written (the failure this budget prevents).
+
+Keep to the budget:
+- Give each agent its share in the prompt: scout about 100k, plan writer about 250k, design reviewer about 150k, reviser about 150k. An agent that reaches its share stops and returns what it has.
+- Ask the questions before the plan is written, never after, so no answer forces a rewrite.
+- Revise once. A second revision, or a plan heading past 800k, means the slice is too big: split it into two plans instead of rewriting.
+- Log every planning agent's tokens in `.agent-work/workflow-metrics.md` and check the running total before each dispatch. The **light plan** fixes the scope, the user's decisions, the contracts between components and the tests each task needs. The implementer designs everything else.
 
 ## Steps
 
