@@ -134,7 +134,7 @@ Nothing runs below Sonnet 5.5. Sonnet 5.5 medium is the default for code includi
 | Name one owner lane for every shared file. | Parallel lanes cannot see each other; shared budgets, docs, wire types and goldens are where they collide. |
 | Review all lanes with one reviewer, seams first. | The Important findings of the lane trial were disagreements on wire names, shared stores, call chains and flags. |
 | Design-review server lanes that write shared state before the build. | The review found 4 serious bugs before any code existed. |
-| A lane leaves what it could not finish well as owed work for the fixers. | Lanes that squeezed in the last tasks shipped broken ones; the fixers write the skipped tests. |
+| A lane finishes every task with its tests, handing off to a fresh agent when its context gets long; nothing is left as owed work. | Lanes that squeezed in their last tasks shipped broken ones; a fresh agent with a hand-off finishes them properly. |
 | Wait for every lane, then review once over everything. | A review of a partial batch missed the seams between lanes and had to be repeated. |
 | The reviewer checks new tests against the server contract. | A wrong unit test pinned a wrong command. |
 | One tester runs the slow gates and loops with the fixers. Rerun a failure alone before treating it as real. | Under heavy parallel load, load-sensitive specs failed that passed alone. |

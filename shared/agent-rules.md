@@ -27,7 +27,7 @@ Every tool call re-reads the agent's whole context, so the cost is about calls �
 
 ## Parallel lanes
 
-When a plan builds as lanes, paste `shared/lane-rules.md` (filled in) instead of the gate cadence and hand-off blocks below. A lane holds 3–5 tasks of one area and runs only fast tests (under a minute each). Lanes stop at their budget and list unreached work as owed work for the fixer. The same flow applies to bug-fix batches and follow-up sweeps.
+When a plan builds as lanes, paste `shared/lane-rules.md` (filled in) instead of the gate cadence and hand-off blocks below. A lane holds 3–5 tasks of one area and runs only fast tests (under a minute each). A lane finishes every task with its tests; if its context gets long it hands off to a fresh agent, which finishes the lane. The same flow applies to bug-fix batches and follow-up sweeps.
 
 ## Gate cadence
 

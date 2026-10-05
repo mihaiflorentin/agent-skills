@@ -42,7 +42,7 @@ You are the **controller**. Subagents write specs, plans and code, and run tests
    3. **Wait for every lane.** Never merge or review a partial batch.
    4. **One merge** of all the lanes into one integration branch, by one merge agent: notes for the merge applied, generated files regenerated, fast checks green, one combined owed-to-tester list.
    5. **One review** (`/review-changes`) of all the changes at once, cross-lane seams first.
-   6. **1–3 fixers**, split by where the findings are: findings in the same files or subsystem go to the same fixer, so it loads that context once. Fixers also write the owed tests of their area. Important findings get a scoped re-review.
+   6. **1–3 fixers**, split by where the findings are: findings in the same files or subsystem go to the same fixer, so it loads that context once. Each fix comes with its test. Important findings get a scoped re-review.
    7. **One tester** (`/test-changes`) runs the full gate and the e2e suite. Real failures go back to the fixer of that area; repeat until green.
    8. **Only then**, when the cycle is finished and the new code is safe to merge, merge the integration branch into the working branch (the branch the project is developed on, which may not be `main`) with the pre-merge gate, and push.
 4. Nothing reaches the working branch lane by lane. A single urgent user-reported bug may go alone, but still gets the review. Bug-fix batches and follow-up sweeps use this same workflow. Regenerate generated files instead of hand-resolving their conflicts.

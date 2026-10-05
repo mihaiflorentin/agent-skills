@@ -37,7 +37,7 @@ Every tool call re-reads your whole context, so cost is calls times context size
 - Batch independent reads in one message. Chain shell steps in one command.
 - Never re-read a file to check an edit you just made.
 - Never wait with `sleep`, `tail -f` or `pgrep` loops. Run long commands in the background and wait for the notice, or make one blocking call.
-- Work you could not finish well is owed work: list it in the ledger rather than squeezing it in.
+- Finish every task of your lane, each with its tests. Never leave a task or a test as owed work. If your context gets long, hand off (below) and a fresh agent finishes the lane.
 
 ## Commits
 
@@ -53,11 +53,10 @@ Keep `.agent-work/plans-run/<plan>/lane-<x>.md`, one line per task with its comm
 - **Deviations:** anything you did differently from the plan, and why.
 - **Notes for the merge:** edits owed to files you do not own, or steps the merge agent must do (regenerate a golden, bump a size budget).
 - **Owed to the tester:** tests and checks you did not run because of the under-a-minute rule.
-- **Owed work:** tasks or tests you did not reach.
 
 ## Hand-off
 
-When your context gets long (around 450k tokens), stop after a committed task and write a HAND-OFF section in your ledger: the seams, the gotchas and the work still owed. A fresh agent continues from it.
+When your context gets long (around 450k tokens), stop after a committed task and write a HAND-OFF section in your ledger: the seams, the gotchas and the tasks still to do. A fresh agent continues from it and finishes the lane.
 
 ## Return contract
 
