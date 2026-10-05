@@ -53,7 +53,7 @@ When you are away, the controller decides with a recommended default, logs it in
 
 1. Run `/orchestrate-development`. The controller reads `.agent-work/STATE.md`, says where things stand, and starts the next plan.
 2. Answer the plan's questions when they appear.
-3. Wait. The controller replies with one short line per agent notification. A plan takes a few hours of wall clock: the build as parallel lanes (3–5 same-area tasks each, at most 4–5 lanes at a time, fast tests only; about 70 minutes for 20 tasks), then, once every lane is done, one merge, one review, 1–3 fixers and one test loop. Only a green result reaches the main branch, and nothing arrives lane by lane.
+3. Wait. The controller replies with one short line per agent notification. A plan takes a few hours of wall clock: the build as parallel lanes (3–5 same-area tasks each, at most 4–5 lanes at a time, fast tests only; about 70 minutes for 20 tasks), then, once every lane is done, one merge, one review, 1–3 fixers and one test loop. Only a green result reaches the working branch, and nothing arrives lane by lane.
 4. When a plan merges, the controller suggests `/compact`. Run it, because the controller's context is re-read on every notification.
 5. Repeat.
 

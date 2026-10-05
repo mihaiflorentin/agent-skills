@@ -52,7 +52,7 @@ When a plan was built as parallel lanes, lanes run only fast tests (under a minu
 - It reads the combined owed-to-tester list and runs the full gate and the full browser suite (the Slow profile's end-of-plan run), in the background with `run-logged.sh`.
 - Specs that advance shared clocks or other global state run last, or on a fresh server.
 - On a failure it reruns that test alone before treating it as real. Under heavy parallel load, load-sensitive tests flake; a pass alone is a flake, to be fixed at the root.
-- A real failure goes back to the fixer that owns that area (`/review-changes`) with the log path. The tester and the fixers loop until green. Only then does the work merge to the main branch and get pushed. Nothing reaches it lane by lane.
+- A real failure goes back to the fixer that owns that area (`/review-changes`) with the log path. The tester and the fixers loop until green. Only then does the work merge to the working branch and get pushed. Nothing reaches it lane by lane.
 
 ## Long runs
 

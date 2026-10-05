@@ -14,7 +14,7 @@ Plan progress:
 - [ ] 2. /plan-slices: questions asked, plan committed
 - [ ] 3. /implement-plans: EVERY lane of the batch finished, then one merge (or both halves done); quota % asked at build start and after the build
 - [ ] 4. /review-changes: one review over all changes, 1-3 fixers; /test-changes: one tester, gate green; quota % asked
-- [ ] 5. Only now merge to the main branch with the pre-merge gate, and push
+- [ ] 5. Only now merge to the working branch with the pre-merge gate, and push
 - [ ] 6. docs/ (decisions, roadmap, terminology) committed; STATE.md and metrics updated; /compact suggested
 ```
 
@@ -44,8 +44,8 @@ You are the **controller**. Subagents write specs, plans and code, and run tests
    5. **One review** (`/review-changes`) of all the changes at once, cross-lane seams first.
    6. **1–3 fixers**, split by where the findings are: findings in the same files or subsystem go to the same fixer, so it loads that context once. Fixers also write the owed tests of their area. Important findings get a scoped re-review.
    7. **One tester** (`/test-changes`) runs the full gate and the e2e suite. Real failures go back to the fixer of that area; repeat until green.
-   8. **Only then** merge the integration branch into the main branch with the pre-merge gate, and push.
-4. Nothing reaches the main branch lane by lane. A single urgent user-reported bug may go alone, but still gets the review. Bug-fix batches and follow-up sweeps use this same workflow. Regenerate generated files instead of hand-resolving their conflicts.
+   8. **Only then**, when the cycle is finished and the new code is safe to merge, merge the integration branch into the working branch (the branch the project is developed on, which may not be `main`) with the pre-merge gate, and push.
+4. Nothing reaches the working branch lane by lane. A single urgent user-reported bug may go alone, but still gets the review. Bug-fix batches and follow-up sweeps use this same workflow. Regenerate generated files instead of hand-resolving their conflicts.
 5. Update and commit `docs/decisions.md`, `docs/roadmap.md` and `docs/terminology.md`, then update `.agent-work/STATE.md` and `.agent-work/workflow-metrics.md`. Suggest `/compact` to the user.
 6. Pick the next plan. Ask the user whether reordering would let them test earlier: you can only run the product in tests, and the user is the first person to try it.
 

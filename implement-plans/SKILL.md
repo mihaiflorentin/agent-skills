@@ -16,7 +16,7 @@ Build progress (parallel lanes, the default):
 - [ ] 4. Each batch: lanes dispatched together; WAIT for every lane; reports read, metrics logged
 - [ ] 5. Merge agent: all lanes merged once (--no-ff), notes applied, fast checks green, owed-to-tester list written
 - [ ] 6. Art lanes: renders approved by the user before commit
-- [ ] 7. Hand over to /review-changes (one review, 1-3 fixers, one tester); main branch only after green
+- [ ] 7. Hand over to /review-changes (one review, 1-3 fixers, one tester); working branch only after green
 ```
 
 Sequential fallback checklist:
@@ -49,7 +49,7 @@ Use **parallel lanes** when the plan has a wave table and a file ownership table
    - `docs/terminology.md`, and for a hexagonal project the build order of `/apply-hexagonal-architecture`.
 5. **Lane tests.** Lanes run only fast tests, each under a minute. Never the full gate, the browser or e2e suites, or a database suite: the tester runs those later. Whatever a lane skips for that reason goes in its ledger under "Owed to the tester". Tests a lane cannot finish within its budget go in the ledger under owed work, and the fixers write them (`/review-changes`).
 6. **Ledger.** Each lane keeps `.agent-work/plans-run/<plan>/lane-x.md` with one line per task and commit, the sections "Notes for the merge" and "Owed to the tester", and a HAND-OFF section if it stops early. A lane stops at its budget and leaves the rest as owed work; it does not squeeze work in.
-7. **Merge agent.** Wait for EVERY lane of the batch to finish. Never merge or review a partial batch, and review as many tasks at once as possible. Then dispatch one `implementer` that merges every lane branch with `--no-ff`, applies each lane's "Notes for the merge" to the files it owns, resolves conflicts (regenerate generated files rather than hand-merging them), runs the fast checks and writes one combined owed-to-tester list. Later waves branch from the merged base. The merge goes to the integration branch only; the main branch waits for the tester's green gate.
+7. **Merge agent.** Wait for EVERY lane of the batch to finish. Never merge or review a partial batch, and review as many tasks at once as possible. Then dispatch one `implementer` that merges every lane branch with `--no-ff`, applies each lane's "Notes for the merge" to the files it owns, resolves conflicts (regenerate generated files rather than hand-merging them), runs the fast checks and writes one combined owed-to-tester list. Later waves branch from the merged base. The merge goes to the integration branch only; the working branch waits for the tester's green gate.
 8. **Art and asset lanes.** Visual art lanes (3D models, icons, portraits, VFX) run on Opus 5.5, in parallel with the code lanes. Audio and music generation runs on Sonnet 5.5 (`shared/agent-rules.md`, Models). Renders are not committed until the user has approved them at an art checkpoint (`/test-changes`, screenshot baselines). Report their tokens separately from the code lanes.
 9. **Metrics.** Record each agent's tokens, tool calls and wall clock in `.agent-work/workflow-metrics.md`.
 10. **Done when** every lane is merged, the fast checks are green on the merged base, and the combined owed-to-tester list exists. Then run `/review-changes`. The full gate belongs to the tester, not to this stage.

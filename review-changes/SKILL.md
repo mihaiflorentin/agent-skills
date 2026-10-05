@@ -43,4 +43,4 @@ Review is the safety net for light plans, and the same flow serves bug-fix batch
 
 ## Done when
 
-The rulings are applied, the owed tests are written, the tester's full gate is green after the fixes, any Important finding has been re-checked, and the open items are logged. Only then does the work merge to the main branch and get pushed.
+The rulings are applied, the owed tests are written, the tester's full gate is green after the fixes, any Important finding has been re-checked, and the open items are logged. Only then does the work merge to the working branch and get pushed.
