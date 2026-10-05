@@ -24,7 +24,7 @@ Claude Code skills for building software with subagents. You make the product de
 | 2 | `/planning-slices` | Once per roadmap slice (a "plan") | A committed light plan, 150–300 lines, quoting your decisions verbatim, with a wave table, lanes and a file ownership table |
 | 3 | `/implementing-plans` | Right after the plan is committed | Parallel lanes of 3–5 same-area tasks (one worktree each), all merged once with fast checks green; two sequential halves when tasks all depend on each other |
 | 4 | `/testing-changes` | Reference, used during stage 3 and before merges | The test cadence, the single tester that runs the full gate and browser suite, how to wait on long runs, flaky-test triage, screenshot review |
-| 5 | `/reviewing-plans` | Right after the build's gate is green | One review over the whole batch (cross-lane seams first), fixed by 1–3 fixers split by area, open items logged |
+| 5 | `/reviewing-changes` | Right after the build's gate is green | One review over the whole batch (cross-lane seams first), fixed by 1–3 fixers split by area, open items logged |
 | – | `/unslop` | Whenever prose is written for people | Specs, plans, docs and messages without AI writing patterns |
 | – | `/applying-hexagonal-architecture` | Only in projects on the hexagonal layout | The layout, service-container rules and layer check the other skills apply there |
 
@@ -34,7 +34,7 @@ Then merge, update the state files, `/compact`, and start the next plan at stage
 /writing-specs          (once per new area)
       │
       ▼
-┌─► /planning-slices ──► /implementing-plans ──► /reviewing-plans ──► merge + /compact ─┐
+┌─► /planning-slices ──► /implementing-plans ──► /reviewing-changes ──► merge + /compact ─┐
 │            (lanes in batches; then one merge, one review, 1-3 fixers, one tester)     │
 └─────────────────────────────────── next plan ───────────────────────────────────────┘
 ```
@@ -45,7 +45,7 @@ Then merge, update the state files, `/compact`, and start the next plan at stage
 - **`/planning-slices`.** You answer up to about 8 questions per plan, mostly keep/cut on proposed features plus the product choices the spec leaves open. Engineering questions are decided for you and logged.
 - **`/implementing-plans`.** Nothing, unless an agent reports a concern that needs a product decision. For UI and visual art work, you approve the renders and screenshots before they are committed. The controller also asks for your weekly quota percentage at the build's start, after it and when the gate is green.
 - **`/testing-changes`.** Nothing. It is the agents' and the controller's reference.
-- **`/reviewing-plans`.** Sometimes one question, when a finding turns out to be a product choice (for example "10% of max or of missing?").
+- **`/reviewing-changes`.** Sometimes one question, when a finding turns out to be a product choice (for example "10% of max or of missing?").
 
 When you are away, the controller decides with a recommended default, logs it in `docs/decisions.md` as its own ruling, and keeps going. You can overrule it later.
 

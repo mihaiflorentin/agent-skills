@@ -1,6 +1,6 @@
 ---
-name: reviewing-plans
-description: Reviews a finished batch once, with one reviewer over all parallel lanes' work, checking the seams between lanes first; writes a rulings file, dispatches 1-3 fixers split by area and re-reviews only Important findings or worse. Use when every lane of a batch is merged and the fast checks are green, or after review fixes land.
+name: reviewing-changes
+description: Reviews the code of a finished batch once, with one reviewer over all parallel lanes' work, checking the seams between lanes first; writes a rulings file, dispatches 1-3 fixers split by area and re-reviews only Important findings or worse. Use when every lane of a batch is merged and the fast checks are green, or after review fixes land.
 disable-model-invocation: true
 ---
 

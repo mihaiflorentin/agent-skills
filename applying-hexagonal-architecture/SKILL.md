@@ -120,7 +120,7 @@ Container rules:
   4. `config/`;
   5. `container/` (getter);
   6. `cmd/` (route or command).
-- **`/reviewing-plans`.** Reviewers run `scripts/check-layers.sh` first. They flag dependency-direction violations, rules in `infrastructure/` or `cmd/`, getters that read fields instead of getters, infrastructure getters returning concrete types, `container/` imported by `domain/`, and services that receive the whole `*config.Config` instead of their sub-struct.
+- **`/reviewing-changes`.** Reviewers run `scripts/check-layers.sh` first. They flag dependency-direction violations, rules in `infrastructure/` or `cmd/`, getters that read fields instead of getters, infrastructure getters returning concrete types, `container/` imported by `domain/`, and services that receive the whole `*config.Config` instead of their sub-struct.
 
 ## Enforcing it
 

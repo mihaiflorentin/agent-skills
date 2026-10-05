@@ -13,7 +13,7 @@ Plan progress:
 - [ ] 1. Read the project files; resume from STATE.md and git log; test profile known; layout set up
 - [ ] 2. /planning-slices: questions asked, plan committed
 - [ ] 3. /implementing-plans: EVERY lane of the batch finished, then one merge (or both halves done); quota % asked at build start and after the build
-- [ ] 4. /reviewing-plans: one review over all changes, 1-3 fixers; /testing-changes: one tester, gate green; quota % asked
+- [ ] 4. /reviewing-changes: one review over all changes, 1-3 fixers; /testing-changes: one tester, gate green; quota % asked
 - [ ] 5. Only now merge to the main branch with the pre-merge gate, and push
 - [ ] 6. docs/ (decisions, roadmap, terminology) committed; STATE.md and metrics updated; /compact suggested
 ```
@@ -29,13 +29,13 @@ You are the **controller**. Subagents write specs, plans and code, and run tests
 | Design a new area | `/writing-specs` | the user approved the spec, with every feature marked as their decision or a proposal they kept |
 | Plan one slice | `/planning-slices` | a committed light plan with binding user decisions quoted verbatim |
 | Build it | `/implementing-plans` | every lane of the batch finished and merged once (parallel lanes, the default) or every task committed (sequential halves), fast checks green |
-| Check it | `/reviewing-plans` | one reviewer over all changes, 1–3 fixers split by area, rulings applied |
+| Check it | `/reviewing-changes` | one reviewer over all changes, 1–3 fixers split by area, rulings applied |
 | Gate and waits | `/testing-changes` | one tester ran the slow gates and looped with the fixers until green; also the reference for cadence, background runs, flakes and screenshot baselines |
 
 ## Loop per plan
 
 1. Read the project files (`shared/project-files.md`). Resume from `.agent-work/STATE.md` and `git log`. On a new project, run `shared/scripts/init-project.sh` first (the committed `docs/` layout plus the git-ignored `.agent-work/`), then time the full gate once and record the test profile, Fast or Slow, in `.agent-work/STATE.md` (`/testing-changes`). Every dispatch carries that profile's cadence.
-2. Run `/planning-slices`, then `/implementing-plans` (parallel lanes by default), then `/reviewing-plans`, then the tester loop of `/testing-changes`.
+2. Run `/planning-slices`, then `/implementing-plans` (parallel lanes by default), then `/reviewing-changes`, then the tester loop of `/testing-changes`.
 3. Nothing reaches the main branch lane by lane. When the tester's gate is green, merge to the main (integration) branch, run the full pre-merge gate and push. A single urgent user-reported bug may go alone, but still gets the review. Bug-fix batches and follow-up sweeps use this same flow. Regenerate generated files instead of hand-resolving their conflicts.
 4. Update and commit `docs/decisions.md`, `docs/roadmap.md` and `docs/terminology.md`, then update `.agent-work/STATE.md` and `.agent-work/workflow-metrics.md`. Suggest `/compact` to the user.
 5. Pick the next plan. Ask the user whether reordering would let them test earlier: you can only run the product in tests, and the user is the first person to try it.
