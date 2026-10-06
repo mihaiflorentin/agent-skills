@@ -52,6 +52,8 @@ This is token-optimised for long gates (a full gate plus e2e of 1–2 hours): ru
 
 When a plan was built as parallel lanes, lanes run only fast tests (under a minute each), so the slow gates move to one place: ONE tester agent, after the merge, the one review and the fixers. Dispatch it as a `test-runner` agent if the user's setup has that type, otherwise as an `implementer`.
 - It reads the combined owed-to-tester list and runs the full gate and the full browser suite (the Slow profile's end-of-plan run), in the background with `run-logged.sh`.
+- It runs one gate at a time (the full gate, then the browser suite) and never starts a build, render or second suite beside it: shared databases, ports and CPU make load-sensitive tests fail for reasons that are not bugs. The controller keeps other heavy work (art renders, builds) off the machine while it runs.
+- It starts a run, then ends its turn with a one-line status in a file (log path, command, start time) and lets the completion notice resume it. It does not sit in a waiting loop, because every wait call re-reads its whole context.
 - Specs that advance shared clocks or other global state run last, or on a fresh server.
 - On a failure it reruns that test alone before treating it as real. Under heavy parallel load, load-sensitive tests flake; a pass alone is a flake, to be fixed at the root.
 - A real failure goes back to the fixer that owns that area (`/review-changes`) with the log path. The tester and the fixers loop until green. The tester runs the pre-merge gate before the merge into the working branch; only then does the work merge and get pushed. Nothing reaches the working branch lane by lane.
